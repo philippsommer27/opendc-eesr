@@ -1,6 +1,6 @@
 from setuptools import setup
 
-requirements = []
+requirements = ['domonic']
 
 setup(
     name='opendc-eesr',
