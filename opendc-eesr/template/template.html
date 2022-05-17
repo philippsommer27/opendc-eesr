@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet"
+        href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
+    <style>
+        p {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .main-border {
+            border-radius: 15px;
+            border: 2px solid black;
+            width: 450px;
+            margin: auto;
+            height: 750px;
+        }
+
+        .divider {
+            border-bottom: 3px solid #333;
+            width: 440px;
+            margin: 0 auto;
+        }
+
+        .h-organizer {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .bottom-organizer {
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .item-left {
+            display: inline-block;
+        }
+
+        .item-right {
+            float: right;
+        }
+
+        .metric-text {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .material-symbols-outlined.green {
+            color: green;
+            font-size: 30px;
+        }
+
+        .material-symbols-outlined.yellow {
+            color: #fce303;
+            font-size: 30px;
+        }
+
+        .v-line {
+            border-left: 2px solid;
+            height: 90px;
+            float: right;
+        }
+
+        .logo {
+            float: right;
+            height: 80px;
+            margin-top: 5px;
+        }
+
+        .figure {
+            width: 445px;
+        }
+    </style>
+</head>
+
+<body style="font-family: Arial, Helvetica, sans-serif;">
+
+    <div class="main-border">
+        <h1 style="text-align: center; margin: 10px;">EES Report</h1>
+        <div class="divider"></div>
+        <div id="metricAppend"></div>
+        <div class="divider"></div>
+        <div id="businessAppend"></div>
+        <div class="divider"></div>
+        <div id="graphAppend"></div>
+        <div class="divider"></div>
+        <div class="bottom-organizer">
+            <div class="item-left">
+                <p>Total Energy Consumption</p>
+                <p>Timeframe</p>
+                <p>Trace Name</p>
+                <p>OpenDC_ver</p>
+            </div>
+            <img src="content/opendc_logo.png" class="logo">
+            <div class="v-line"></div>
+            
+        </div>
+    </div>
+
+</body>
+
+</html>

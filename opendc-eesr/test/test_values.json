@@ -1,0 +1,15 @@
+{
+    "metrics" : [{"CUE" : 1.5},
+        {"CO2 Total" : 38.7},
+        {"APCren" : 0.192}],
+    "business" : [
+        {"SLA Violations" : 5},
+        {"Job Success Rate": "99.6%"}
+    ],
+    "data_points" : [
+        {"renewable_to_consumed" : [
+            [10, 18, 98, 83, 18, 22],
+            [15, 19, 13, 19, 18, 17]
+        ]}
+    ]
+}
