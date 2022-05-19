@@ -41,32 +41,34 @@ def build_energy_graph(x1, x2):
     plt.savefig('template/content/energy_graph.png')
     return img(src='content/energy_graph.png', _class='figure')
 
-f = open("template/template.html", "r")
-parser = html5lib.HTMLParser(tree=getTreeBuilder())
-page = parser.parse(f)
+def insert_business_related(page, data):
+    business_append = page.getElementById("businessAppend")
 
-metrics_append = page.getElementById("metricAppend")
-business_append = page.getElementById("businessAppend")
-graph_append = page.getElementById("graphAppend")
+    for metric in data["business"]:
+        name, value = metric.popitem()
+        business_append.append(build_business_div(name, value))
 
-with open("test/test_values.json", "r") as read_file:
-    data = json.load(read_file)
+def insert_visuals(page, data):
+    graph_append = page.getElementById("graphAppend")
+    
+    x1, x2 = data["data_points"][0].popitem()[1]
+    energy_graph = build_energy_graph(x1, x2)
 
-for metric in data["metrics"]:
-    name, value = metric.popitem()
-    metrics_append.append(build_metric_div(name, value, randint(0,1)))
+    graph_append.append(energy_graph)
 
-for metric in data["business"]:
-    name, value = metric.popitem()
-    business_append.append(build_business_div(name, value))
+def insert_metrics(page, data):
+    metrics_append = page.getElementById("metricAppend")
 
-x1, x2 = data["data_points"][0].popitem()[1]
-energy_graph = build_energy_graph(x1, x2)
+    for metric in data["metrics"]:
+        name, value = metric.popitem()
+        metrics_append.append(build_metric_div(name, value, randint(0,1)))
 
-graph_append.append(energy_graph)
+def read_template(path="template/template.html"):
+    file = open(path, "r")
+    parser = html5lib.HTMLParser(tree=getTreeBuilder())
+    return parser.parse(file)
 
-f = open("template/eesr-report.html", "w")
-f.write(f"{page}")
-f.close()
-
-
+def write_html(page, path="template/eesr-report.html"):
+    f = open("template/eesr-report.html", "w")
+    f.write(f"{page}")
+    f.close()
