@@ -1,4 +1,6 @@
 from cgitb import html
+
+from sklearn import metrics
 import html_builder
 import json
 
@@ -8,11 +10,10 @@ def read_data(path):
 
 def generate_standard_profile(data_path):
     data = read_data(data_path)
-    
-    page = html_builder.read_template()
+    builder = html_builder.HTMLBuilder(data)
 
-    html_builder.insert_metrics(page, data)
-    html_builder.insert_business_related(page, data)
-    html_builder.insert_visuals(page, data)
+    builder.generate_business_related()
+    builder.generate_metrics()
+    builder.generates_graphs()
 
-    html_builder.write_html(page)
+    builder.write_html()

@@ -8,18 +8,19 @@
         p {
             margin-top: 5px;
             margin-bottom: 5px;
+            font-size: 13px;
         }
         .main-border {
             border-radius: 15px;
             border: 2px solid black;
-            width: 450px;
+            width: 475px;
             margin: auto;
-            height: 750px;
+            /* height: 750px; */
         }
 
         .divider {
             border-bottom: 3px solid #333;
-            width: 440px;
+            width: 465px;
             margin: 0 auto;
         }
 
@@ -41,6 +42,11 @@
 
         .item-right {
             float: right;
+            text-align: right;
+        }
+
+        .item-right-info{
+            margin-right: 5px;
         }
 
         .metric-text {
@@ -71,7 +77,20 @@
         }
 
         .figure {
-            width: 445px;
+            margin: 0 auto;
+            width: 475px;
+        }
+
+        .doclink {
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .comment{
+            font-size: 16px;
+            text-align: center ;
         }
     </style>
 </head>
@@ -91,15 +110,24 @@
             <div class="item-left">
                 <p>Total Energy Consumption</p>
                 <p>Timeframe</p>
-                <p>Trace Name</p>
-                <p>OpenDC_ver</p>
+                <p>Data Source</p>
+                <p>OpenDC-EESR Version</p>
             </div>
-            <img src="content/opendc_logo.png" class="logo">
+            <img src="template/content/opendc_logo.png" class="logo">
             <div class="v-line"></div>
+            <div class="item-right item-right-info">
+                <p>405MW</p>
+                <p>23/Nov/2017 - 6/Jan/2018</p>
+                <p>Solvinity</p>
+                <p>0.0.1</p>
+            </div>
+
             
+        </div>
+        <div class="doclink">
+            <a href="http://opendc-eesr.readthedocs.io/" target="_blank" >Methodology and Documentation</a>
         </div>
     </div>
 
 </body>
-
 </html>
