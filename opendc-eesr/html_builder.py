@@ -39,7 +39,9 @@ class HTMLBuilder:
             div(_class="item-left").html(
                 h2(_class="metric-text").html(name)
             ),
-            div(_class="item-right").html(
+            div(_class="item-right").html( 
+                img(_class="energy-icon", src="template/content/rating_ap.svg")
+                if value == "A+" else
                 h2(_class="metric-text").html(value)
             )
         )
