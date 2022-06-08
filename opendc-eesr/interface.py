@@ -4,8 +4,8 @@ from sklearn import metrics
 import html_builder
 import json
 
-def read_data(path):
-    with open("test/test_values.json", "r") as read_file:
+def read_data(data_path):
+    with open(data_path, "r") as read_file:
         return json.load(read_file)
 
 def generate_standard_profile(data_path):
