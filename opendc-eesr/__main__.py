@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import interface
+import logging
 
 def dispatch(args):
     interface.generate_standard_profile(args.data)

@@ -1,0 +1,106 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id" : "",
+    "title": "OpenDC EESR Data Schema",
+    "description": "JSON schema definition for expected data for opendc-eesr report builder",
+    "type" : "object",
+    "properties" : {
+        "builtin_metrics" : {
+            "type" : "array",
+            "additionalProperties" : false,
+            "items" : {
+                "anyOf" : [
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "CUE" : { "type" : "number"}
+                        },
+                        "required" : ["CUE"]
+                    },
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "APCr" : { "type" : "number"}
+                        },
+                        "required" : ["APCr"]
+                    },
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "CO2" : { "type" : "number"}
+                        },
+                        "required" : ["CO2"]
+                    },
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "GEC" : { "type" : "number"}
+                        },
+                        "required" : ["GEC"]
+                    },
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "TUE" : { "type" : "number"}
+                        },
+                        "required" : ["TUE"]
+                    },
+                    {
+                        "type" : "object",
+                        "properties" : {
+                            "NeNr" : { "type" : "number"}
+                        },
+                        "required" : ["NeNr"]
+                    }
+                ]
+            }
+        },
+        "additional_metrics" : {
+            "title" : "Additional metrics for custom profile/template",
+            "type" : "array",
+            "items" : {
+                "type" : "object",
+                "properties" : {
+                    "name" : {
+                        "type" : "string",
+                        "maxLength" : 8
+                    },
+                    "desc" : {
+                        "description" : "A short description for hover tooltip or dashboard view.",
+                        "type" : "string"
+                    },
+                    "documentation" : {
+                        "description" : "A link to resources which describes the metric in full detail. May be research paper.",  
+                        "type" : "string",
+                        "format" : "uri"
+                    },
+                    "icon" : {
+                        "description" : "Select the icon displayed beside the metric indicating whether it is efficiency or sustainability focused.",
+                        "enum" : ["energy", "sustainability", "none", "custom"]
+                    }
+                },
+                "if" : {
+                    "properties" : { "icon" : { "const" : "custom"}}
+                },
+                "then" : {
+                    "properties" : { "custom_i" : {
+                            "desc" : "Name and desired color of custom icon. Must be from https://fonts.google.com/icons. Use <span> name!",
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {"type" : "string"},
+                                "color" : { "type" : "string"}
+                            }
+                        } 
+                    }
+                }
+                ,
+                "required" : ["name", "desc", "documentation", "icon"]
+            }
+        },
+        "metadata" : {
+        }
+
+    },
+    "required": ["builtin_metrics", "metadata"]
+
+}

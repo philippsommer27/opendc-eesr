@@ -1,8 +1,14 @@
+from asyncio.log import logger
 from cgitb import html
 
-from sklearn import metrics
 import html_builder
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+def setup_logging():
+    pass
 
 def read_data(data_path):
     with open(data_path, "r") as read_file:
