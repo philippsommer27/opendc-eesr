@@ -6,53 +6,43 @@
     "type" : "object",
     "properties" : {
         "builtin_metrics" : {
-            "type" : "array",
+            "type" : "object",
             "additionalProperties" : false,
-            "items" : {
-                "anyOf" : [
-                    {
-                        "type" : "object",
-                        "properties" : {
-                            "CUE" : { "type" : "number"}
-                        },
-                        "required" : ["CUE"]
+            "properties" : {
+                    "CUE" : {
+                        "type" : "number"
                     },
-                    {
-                        "type" : "object",
-                        "properties" : {
-                            "APCr" : { "type" : "number"}
-                        },
-                        "required" : ["APCr"]
+                    "APCr" : {
+                        "type" : "number"
                     },
-                    {
-                        "type" : "object",
-                        "properties" : {
-                            "CO2" : { "type" : "number"}
-                        },
-                        "required" : ["CO2"]
+                    "CO2" : {
+                        "type" : "number"
                     },
-                    {
-                        "type" : "object",
-                        "properties" : {
-                            "GEC" : { "type" : "number"}
-                        },
-                        "required" : ["GEC"]
+                    "GEC" : {
+                        "type" : "number"
                     },
-                    {
-                        "type" : "object",
-                        "properties" : {
-                            "TUE" : { "type" : "number"}
-                        },
-                        "required" : ["TUE"]
+                    "TUE" : {
+                        "type" : "number"
                     },
-                    {
+                    "NeNr" : {
+                        "type" : "number"
+                    },
+                    "total_energy" : {
                         "type" : "object",
                         "properties" : {
-                            "NeNr" : { "type" : "number"}
-                        },
-                        "required" : ["NeNr"]
+                            "value" : { "type" : "number" },
+                            "unit" : {
+                                "type" : "string",
+                                "enum" : [
+                                    "Wh",
+                                    "kWh",
+                                    "MWh",
+                                    "GWh",
+                                    "TWh"
+                                ]
+                            }
+                        }
                     }
-                ]
             }
         },
         "additional_metrics" : {
@@ -92,12 +82,37 @@
                             }
                         } 
                     }
-                }
-                ,
+                },
                 "required" : ["name", "desc", "documentation", "icon"]
             }
         },
         "metadata" : {
+            "desc" : "Metadata describing the origin of the data",
+            "type" : "object",
+            "properties" : {
+                "start_time" : {
+                    "type" : "string",
+                    "format" : "date"
+                },
+                "end_time" : {
+                    "type" : "string",
+                    "format" : "date"
+                },
+                "enviroment" : {
+                    "desc" : "The environment from where the data originates.",
+                    "type" : "string",
+                    "examples" : [
+                        "OpenDC Simulator",
+                        "AWS Frankfurt"
+                    ]
+                }, 
+                "enviroment_link" : {
+                    "desc" : "Link",
+                    "type" : "string",
+                    "format" : "uri"
+                }
+            },
+            "required" : []
         }
 
     },
