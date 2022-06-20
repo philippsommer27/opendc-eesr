@@ -1,5 +1,49 @@
 {
     "PUE" : {
-        
-    }
+        "fullname" : "Power Usage Effectiveness",
+        "icon" : "electric_bolt",
+        "documentation" : ""
+    },
+    "CUE" : {
+        "fullname" : "Carbon Usage Effectiveness",
+        "icon" : "electric_bolt",
+        "documentation" : ""
+    },
+    "APCr" : {
+        "fullname" : "Adaptability Power Curve at Renewable Energies",
+        "icon" : "eco",
+        "documentation" : ""        
+    },
+    "CO2" : {
+        "fullname" : "Total carbon dioxide emissions",
+        "icon" : "eco",
+        "documentation" : ""        
+    },
+    "GEC" : {
+        "fullname" : "Green Energy Coefficient",
+        "icon" : "eco",
+        "documentation" : ""        
+    },
+    "TUE" : {
+        "fullname" : "Total-power Usage Effectiveness",
+        "icon" : "electric_bolt",
+        "documentation" : ""        
+    },
+    "NeNr" : {
+        "fullname" : "Non-essential Non-renewable",
+        "icon" : "eco",
+        "documentation" : ""        
+    },
+    "CADE" : {
+        "fullname" : "Corporate Average Data Center Efficiency",
+        "icon" : "none",
+        "documentation" : ""        
+    },
+    "DPPE" : {
+        "fullname" : "Data Center Performance Per Energy",
+        "icon" : "none",
+        "documentation" : ""        
+    }  
+
+    
 }

@@ -9,6 +9,9 @@
             "type" : "object",
             "additionalProperties" : false,
             "properties" : {
+                    "PUE" : {
+                        "type" : "number"
+                    },
                     "CUE" : {
                         "type" : "number"
                     },
@@ -42,6 +45,12 @@
                                 ]
                             }
                         }
+                    },
+                    "CADE" : {
+                        "type" : "number"
+                    },
+                    "DPPE" : {
+                        "type" : "number"
                     }
             }
         },
@@ -67,6 +76,9 @@
                     "icon" : {
                         "description" : "Select the icon displayed beside the metric indicating whether it is efficiency or sustainability focused.",
                         "enum" : ["energy", "sustainability", "none", "custom"]
+                    },
+                    "value" : {
+                        "type" : "number"
                     }
                 },
                 "if" : {
@@ -74,7 +86,7 @@
                 },
                 "then" : {
                     "properties" : { "custom_i" : {
-                            "desc" : "Name and desired color of custom icon. Must be from https://fonts.google.com/icons. Use <span> name!",
+                            "description" : "Name and desired color of custom icon. Must be from https://fonts.google.com/icons. Use <span> name for name!",
                             "type" : "object",
                             "properties" : {
                                 "name" : {"type" : "string"},
@@ -86,20 +98,31 @@
                 "required" : ["name", "desc", "documentation", "icon"]
             }
         },
+        "domain" : {
+            "title" : "Domain specific details to report",
+            "type" : "array",
+            "items" : {
+                "type" : "object",
+                "properties" : {
+                    "name" : {"type" : "string"},
+                    "value" : {"type" : "number"}
+                }
+            }
+        },
         "metadata" : {
-            "desc" : "Metadata describing the origin of the data",
+            "description" : "Metadata describing the origin of the data",
             "type" : "object",
             "properties" : {
-                "start_time" : {
+                "start_date" : {
                     "type" : "string",
                     "format" : "date"
                 },
-                "end_time" : {
+                "end_date" : {
                     "type" : "string",
                     "format" : "date"
                 },
-                "enviroment" : {
-                    "desc" : "The environment from where the data originates.",
+                "environment" : {
+                    "description" : "The environment from where the data originates.",
                     "type" : "string",
                     "examples" : [
                         "OpenDC Simulator",
@@ -107,15 +130,13 @@
                     ]
                 }, 
                 "enviroment_link" : {
-                    "desc" : "Link",
+                    "description" : "Link",
                     "type" : "string",
                     "format" : "uri"
                 }
             },
-            "required" : []
+            "required" : ["start_date", "end_date", "environment"]
         }
-
     },
     "required": ["builtin_metrics", "metadata"]
-
 }

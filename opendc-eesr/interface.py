@@ -1,9 +1,7 @@
-from asyncio.log import logger
-from cgitb import html
-
 import html_builder
 import json
 import logging
+import validator
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +12,17 @@ def read_data(data_path):
     with open(data_path, "r") as read_file:
         return json.load(read_file)
 
-def generate_standard_profile(data_path):
+def generate_standard_profile(data_path, profile_name, domain=False):
     data = read_data(data_path)
-    builder = html_builder.HTMLBuilder(data)
+    builder = html_builder.HTMLBuilder(data, profile_name)
 
-    builder.generate_business_related()
+    validator.run_basic_validation(data, builder.profile)
+
+    if domain : builder.generate_domain()
     builder.generate_metrics()
     builder.generates_graphs()
 
     builder.write_html()
+
+if __name__ == '__main__':
+    generate_standard_profile('test/test_values.json', "std_prof", domain=True)

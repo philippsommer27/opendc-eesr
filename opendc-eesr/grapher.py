@@ -1,14 +1,5 @@
-from distutils.fancy_getopt import wrap_text
-from re import template
-from tempfile import tempdir
-from tkinter import Y
-from turtle import width
-import matplotlib
-import plotly
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.io as pio
 
 
 def selector(name, **args):

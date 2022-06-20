@@ -1,20 +1,5 @@
 {
-    "metrics" : {
-        "amount" : 3,
-        "names" : ["TUE", "CUE", "APCren"],
-        "i_desc" : ["Energy Effeciency", "Energy Sustainability"]
-    },
-    "icons" : {
-        "TUE" : "electric_bolt",
-        "CUE" : "eco",
-        "APCren" : "eco"
-    },
-    "context" : {
-        "amount" : 1,
-        "names" : ["SLA Violations"]
-    },
-    "graphs" : {
-        "amount" : 1,
-        "type" : ["energy_sources_comp"]
-    }
+    "name" : "Standard 0.0.1",
+    "builtin_metrics" : ["TUE", "GEC", "APCr"],
+    "graphs" : ["metric_cmp_dppe"]
 }
