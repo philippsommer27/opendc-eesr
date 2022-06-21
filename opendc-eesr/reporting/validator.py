@@ -15,7 +15,7 @@ class MissingMetricsError(Exception):
 
 '''Validates that metric results input matches expected. '''
 def validate_data_in(data):
-    schema= load_json("library\schemas\metrics_input_schema.json")
+    schema= load_json("reporting/library/schemas/metrics_input_schema.json")
     jsonschema.validate(data, schema)
 
 '''Validate that the given input contains required values by profile'''

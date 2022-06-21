@@ -15,4 +15,4 @@ def generate_unique_id(input_dict):
 
 
 def inline(path="report.html"):
-    subprocess.run(["node", "inliner.js", path])
+    subprocess.run(["node", "reporting/inliner.js", path])

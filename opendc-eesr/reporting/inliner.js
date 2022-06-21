@@ -11,6 +11,6 @@ options = {webResources : {
 juice.juiceResources(string, options, function(err, html) {
 	fs.writeFile(args[0].replace('.html', '_inline.html'), html, (err) => {
 	    if (err) return console.error(err);
-	    console.log("File successfully written !");
+	    console.log("Inline Successful!");
 	});
 });

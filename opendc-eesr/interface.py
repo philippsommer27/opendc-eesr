@@ -1,7 +1,6 @@
-import html_builder
+from reporting import run_basic_validation, html_builder
 import json
 import logging
-import validator
 from util import inline
 
 logger = logging.getLogger(__name__)
@@ -17,7 +16,7 @@ def generate_standard_profile(data_path, profile_name, domain=False):
     data = read_data(data_path)
     builder = html_builder.HTMLBuilder(data, profile_name)
 
-    validator.run_basic_validation(data, builder.profile)
+    run_basic_validation(data, builder.profile)
 
     if domain : builder.generate_domain()
     builder.generate_metrics()
