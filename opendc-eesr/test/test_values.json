@@ -8,8 +8,9 @@
         "start_date" : "2018-11-13",
         "end_date" : "2019-4-23",
         "environment" : "OpenDC Simulator",
-        "enviroment_link" : "https://opendc.org/"
+        "environment_link" : "https://opendc.org/"
     },
+    "graph_comment" : "No significant adaptation of energy consumption.",
     "domain" : [
         {
             "name" : "SLA Violations",

@@ -109,6 +109,9 @@
                 }
             }
         },
+        "graph_comment" : {
+            "type" : "string"
+        },
         "metadata" : {
             "description" : "Metadata describing the origin of the data",
             "type" : "object",
@@ -129,7 +132,7 @@
                         "AWS Frankfurt"
                     ]
                 }, 
-                "enviroment_link" : {
+                "environment_link" : {
                     "description" : "Link",
                     "type" : "string",
                     "format" : "uri"

@@ -1,7 +1,7 @@
 from domonic.html import *
 from domonic.ext.html5lib_ import getTreeBuilder
 import html5lib
-from util import load_json
+from util import load_json, generate_unique_id
 import grapher
 
 
@@ -66,8 +66,10 @@ class HTMLBuilder:
     def generates_graphs(self):
         graph_append = self.page.getElementById("graphAppend")
 
-        comment = p(_class="comment").html("No significant adaptation of energy consumption.")
-        graph_append.append(comment)
+        
+        if "graph_comment" in self.data:
+            comment = p(_class="comment").html(self.data['graph_comment'])        
+            graph_append.append(comment)
 
     def generate_metrics(self):
         metrics_append = self.page.getElementById("metricAppend")
@@ -78,12 +80,33 @@ class HTMLBuilder:
 
             metrics_append.append(self.__build_metric_div(metric, value, icon))
 
+    def generate_meta(self):
+        bottom_name_append = self.page.getElementById("bottomNameAppend")
+        bottom_value_append = self.page.getElementById("bottomValueAppend")
+
+        duration = self.data['metadata']['start_date'] + " to " + self.data['metadata']['end_date']
+        bottom_name_append.append(p("Timeframe"))
+        bottom_value_append.append(p(duration))
+
+        bottom_name_append.append(p("Environment"))
+        if "environment_link" in self.data['metadata']:
+            bottom_value_append.append(p().html(a(
+                self.data['metadata']['environment'],
+                _href=self.data['metadata']['environment_link'],
+                _target="_blank"
+            )))
+        else:
+            bottom_value_append.append(p(self.data['metadata']['environment']))
+
+        bottom_name_append.append(p("Report ID"))
+        bottom_value_append.append(p(generate_unique_id(self.data)))
+
     def read_template(self, path):
         file = open(path, "r")
         parser = html5lib.HTMLParser(tree=getTreeBuilder())
         return parser.parse(file)
 
-    def write_html(self, path="eesr-report.html"):
+    def write_html(self, path="report.html"):
         f = open(path, "w")
         f.write(f"{self.page}")
         f.close()
