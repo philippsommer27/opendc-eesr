@@ -42,7 +42,9 @@ PUE is by far the most popular data center energy efficiency metric adopted acro
 
 Despite its heavy use, PUE is limited as a metric and suffers from misuse.
 
-Generally, a large value **can** be indicative of inefficiencies in a data center's infrastructure, **but** this must be taken as a signal for further investigation; not a final fact. No conclusions can be drawn about the efficiency of IT equipment, scheduling techniques, and resource allocation from PUE.&#x20;
+Generally, a large value **can** be indicative of inefficiencies in a data center's infrastructure, **but** this must be taken as a signal for further investigation; not a final fact.&#x20;
+
+No conclusions can be drawn about the efficiency of IT equipment, scheduling techniques, and resource allocation from PUE.&#x20;
 
 **Unsuitable for Comparison**
 
@@ -51,11 +53,13 @@ One of the major disadvantages of PUE is that is not suitable for comparing diff
 1. Differences in the climate of two data centers can result in vastly different PUE values but does not oblige that one data center has a more energy efficient system than the other.
 2. Unless specifically detailed, two PUE values from different sources could be measured in different ways. Variations such as measuring points and measurement interval renders a blind comparison useless.&#x20;
 
+> PUE is a metric best used as a tool for management, rather than for making comparisons with other facilities. [\[1\]](pue.md#sources)
+
 **Difficult to Measure**
 
 Although not an inherent flaw with the metric, PUE poses the challenge of needing measuring points at various locations for best insight. Energy measurements should take place as near to the IT equipment as possible, however this is not always possible and as such losses from intermediate power delivery systems are not taken into account.&#x20;
 
-Measuring can also be difficult in data center located in an office room with no obvious metering opportunity.&#x20;
+Measuring can also be difficult in mix-use facilities where electricity is not clearly sectioned and other activities take place.&#x20;
 
 **Solo Metric**
 
@@ -90,6 +94,18 @@ A <mark style="color:green;">low</mark> PUE value **DOES NOT** indicate that:
 
 * the data center is _sustainable_
 * uses energy efficient equipment and no energy is wasted
+
+## Improvement Strategies
+
+There are multiple meaningful ways to decrease data center PUE:
+
+* Implement novel cooling solutions
+  * Dynamic cooling
+  * Water cooling (sustainably)
+  * Tweak topology for more efficient cooling
+  * Insulation
+  * other temperature improvements...
+* Improve energy efficiency of supporting infrastructure (e.g. lighting)
 
 ## Sources
 

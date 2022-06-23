@@ -1,7 +1,3 @@
----
-description: Welcome to the documentation and knowledge base!
----
-
 # What is EESR?
 
 The Energy Sustainability and Efficiency Reporting (EESR) instrument aims to provide a complete report generation solution for data center (DC) energy efficiency. Featuring a curated library of reporting metrics and visualizations, EESR prioritizes ease of use while maintaining high configurability for all audiences.
