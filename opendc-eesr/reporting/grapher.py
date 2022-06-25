@@ -1,16 +1,40 @@
+from turtle import color
+from unicodedata import name
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
+import plotly.express as px
+import numpy as np
+import seaborn as snNew
+import matplotlib.pyplot as pltNew
 
 def selector(name, **args):
     graph_func_lookup[name](args)
 
 
-def energy_sources_comp(data):
-    pass
+def energy_sources_comp(df):
+    fig=go.Figure()
 
-def ranking_bar_chart(this, others, metric_name):
-    pass
+    fig.add_trace(go.Scatter(x=df.index,
+        y=df['']
+    ))
+
+
+def ranking_bar_chart(x, y, metric_name):
+    y=np.array([10, 12, 15, 19, 28])
+    color=np.array(['rgb(255,255,255)']*y.shape[0])
+    color[y<20]='rgb(204,204, 205)'
+    color[y>=20]='rgb(130, 0, 0)'
+
+    fig = go.Figure(go.Bar(
+        x=x, y=y, orientation='h',
+    ))
+    fig.update_xaxes(title_text="Data Center (Self Reported)")
+    fig.update_yaxes(title_text="Power Usage Effectiveness")
+
+
+    write_path = "library/templates/content/metric_compare.svg"
+    fig.write_image(write_path)
+
 
 
 def rn_energy_adapt(dc_cons, ren_prod, x):
@@ -55,3 +79,10 @@ graph_func_lookup = {
     "rn_energy_adapt": rn_energy_adapt,
     "ranking_bar_chart": ranking_bar_chart,
 }
+
+
+if __name__ == "__main__":
+    y = ["Google Avg", "this", "DC3 PARIS - Scaleway", "Equinix",  "World Average"]
+    x = [1.10, 1.28, 1.35, 1.4, 1.59]
+    ranking_bar_chart(x, y, "Power Usage Effectiviness (PUE)")
+
