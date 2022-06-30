@@ -10,14 +10,19 @@ def process(path, offset_time=None):
 
     df = df.groupby(['timestamp']).agg(
         {
-            'power_total':sum,
-            'power_usage':sum,
+            'dc_power_total':sum,
         }
     )
 
+    df.reset_index(inplace=True)
+
     if offset_time is not None:
-        df['timestamp'] = pd['timestamp'] + (pd.Timestamp(offset_time).timestamp * 1000)
+        df['timestamp'] = df['timestamp'] + (pd.Timestamp(offset_time).timestamp() * 1000)
     
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-    df['power_total'] = joule_to_kWh(df['power_total'])
+    df['dc_power_total'] = joule_to_kWh(df['dc_power_total'])
+
+    df.set_index('timestamp', inplace=True)
+
+    return df

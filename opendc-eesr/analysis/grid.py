@@ -1,4 +1,5 @@
 from sqlite3 import Timestamp
+from tkinter.tix import Tree
 import pandas as pd
 from entsoe import EntsoePandasClient, mappings
 from pyparsing import col
@@ -7,6 +8,12 @@ def get_key(path):
     with open(path, "r") as file:
         return file.read().strip()
 
+
+def calc_total_prod(df: pd.DataFrame):
+    if 'total_prod' in df:
+        df.drop('total_prod', axis=1, inplace=True)
+
+    df['total_prod'] = df.loc[:, df.columns.isin(list(PROD_CAT))].sum(axis=1)
 
 def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: Timestamp, end:Timestamp):
     client = EntsoePandasClient(api_key=get_key(key_path))
@@ -28,8 +35,6 @@ def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: Timestamp, e
                 df[column] = df[column] + neighbour_prod[column + '_flow']
             else:
                 df[column] = neighbour_prod[column + '_flow']
-
-        df.drop('total_prod', axis=1, inplace=True)
         
 
 def fetch_energy_prod(start: Timestamp, end: Timestamp, key_path, country='NL', get_bordering=False):
@@ -50,10 +55,10 @@ def fetch_energy_prod(start: Timestamp, end: Timestamp, key_path, country='NL', 
 
     return df
 
-def calc_energy_prod_ratios(df: pd.DataFrame):
+def compute_energy_prod_ratios(df: pd.DataFrame):
     columns = df.columns()
 
-    df['total_prod'] = df.sum(axis=1)
+    calc_total_prod(df)
 
     df['renewable_total'] = 0
     df['non_renewable_total'] = 0
@@ -78,18 +83,46 @@ def calc_energy_prod_ratios(df: pd.DataFrame):
     df['non_green_perc'] = df['non_green_total'] / df['total_prod']
 
 
+def compute_dc_cons_by_type_naive(df: pd.DataFrame):
+    assert('dc_power_total' in df, "Dataframe does not contain data center power consumption, consider calling merge_dc_grid()")
+
+    calc_total_prod(df)
+
+    for column in df.columns():
+        if column in PROD_CAT.keys():
+            df['dc_cons_' + column] = (df[column] / df['total_prod']) * df['dc_power_total']
+
+def merge_dc_grid(df_grid: pd.DataFrame, df_dc: pd.DataFrame):
+    pass
 
 def fetch_generation_forecast_csv(start: Timestamp, end: Timestamp, key_path, out, country='NL'):
     client = EntsoePandasClient(api_key=get_key(key_path))
 
     df = client.query_wind_and_solar_forecast(country_code=country, start=start, end=end)
+    df = df.fillna(0)
+
     df.to_csv(out)
 
 
-def compute_apcren():
+def compute_apcren(df: pd.DataFrame):
+    assert('dc_power_total' in df, "Dataframe does not contain DC power usage")
+    assert('renewable_total' in df, "Dataframe does not contain grid renewable consumption")
+
+    dc_sum_consumption_mw = df['dc_power_total'] / 1000
+    grid_sum_renewable_production = df['renewable_total']
+    K = dc_sum_consumption_mw.sum() / grid_sum_renewable_production.sum()
+    
+    numerator = abs((K * grid_sum_renewable_production) - dc_sum_consumption_mw).sum()
+    APCren = 1 - (numerator / dc_sum_consumption_mw)
+
+    return APCren
+
+
+def compute_total_co2(df: pd.DataFrame):
     pass
 
-def compute_total_co2():
+
+def compute_power_cost():
     pass
 
 def compute_gec():
