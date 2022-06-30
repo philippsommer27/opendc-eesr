@@ -78,12 +78,31 @@ def calc_energy_prod_ratios(df: pd.DataFrame):
     df['non_green_perc'] = df['non_green_total'] / df['total_prod']
 
 
+
 def fetch_generation_forecast_csv(start: Timestamp, end: Timestamp, key_path, out, country='NL'):
     client = EntsoePandasClient(api_key=get_key(key_path))
 
     df = client.query_wind_and_solar_forecast(country_code=country, start=start, end=end)
     df.to_csv(out)
 
+
+def compute_apcren():
+    pass
+
+def compute_total_co2():
+    pass
+
+def compute_gec():
+    pass
+
+def compute_cue():
+    pass
+
+def compute_nenr():
+    pass
+
+def compute_sustainability_metrics(df: pd.DataFrame, out):
+    pass
 
 PROD_CAT = {
     'Mixed' : {'renewable' : False, 'green' : False},
