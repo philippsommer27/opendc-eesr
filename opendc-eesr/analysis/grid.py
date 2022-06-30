@@ -1,3 +1,4 @@
+from sqlite3 import Timestamp
 import pandas as pd
 from entsoe import EntsoePandasClient, mappings
 from pyparsing import col
@@ -7,13 +8,34 @@ def get_key(path):
         return file.read().strip()
 
 
-def fetch_energy_prod_type(start_time, end_time, key_path, timezone='Europe/Amsterdam', country_code='NL'):
+def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: Timestamp, end:Timestamp):
     client = EntsoePandasClient(api_key=get_key(key_path))
 
-    start = pd.Timestamp(start_time, tz=timezone)
-    end = pd.Timestamp(end_time, tz=timezone)
+    for neighbour_code in mappings.NEIGHBOURS['country']:
+        neighbour_flow = client.query_crossborder_flows(country, neighbour_code, start, end)
+        neighbour_prod = fetch_energy_prod(start, end, key_path, neighbour_code)
+
+        assert(neighbour_flow.shape[0] == neighbour_prod.shape[0], "Fetch Border Error: Flow data and production data do not match")
+        
+        columns = neighbour_prod.columns()
+        neighbour_prod['total_prod'] = neighbour_prod.sum(axis=1)
+
+        for column in columns:
+            neighbour_prod[column + '_perc'] = neighbour_prod[column] / neighbour_prod['total_prod']
+            neighbour_prod[column + '_flow'] = neighbour_prod[column + '_perc'] * neighbour_flow
+
+            if column in df.columns:
+                df[column] = df[column] + neighbour_prod[column + '_flow']
+            else:
+                df[column] = neighbour_prod[column + '_flow']
+
+        df.drop('total_prod', axis=1, inplace=True)
+        
+
+def fetch_energy_prod(start: Timestamp, end: Timestamp, key_path, country='NL', get_bordering=False):
+    client = EntsoePandasClient(api_key=get_key(key_path))
     
-    df = client.query_generation(country_code, start=start, end=end)
+    df = client.query_generation(country, start=start, end=end)
 
     # Cleanup
 
@@ -23,15 +45,15 @@ def fetch_energy_prod_type(start_time, end_time, key_path, timezone='Europe/Amst
 
     df.columns = df.columns.droplevel(-1)
 
-    df['total_prod'] = df.sum(axis=1)
+    if get_bordering():
+        _fetch_cross_border(df, client, country, start, end)
 
     return df
 
-def add_cross_border():
-    pass
-
-def calc_additional_energy_prod(df: pd.DataFrame):
+def calc_energy_prod_ratios(df: pd.DataFrame):
     columns = df.columns()
+
+    df['total_prod'] = df.sum(axis=1)
 
     df['renewable_total'] = 0
     df['non_renewable_total'] = 0
@@ -56,9 +78,11 @@ def calc_additional_energy_prod(df: pd.DataFrame):
     df['non_green_perc'] = df['non_green_total'] / df['total_prod']
 
 
+def fetch_generation_forecast_csv(start: Timestamp, end: Timestamp, key_path, out, country='NL'):
+    client = EntsoePandasClient(api_key=get_key(key_path))
 
-if __name__ == "__main__":
-    fetch_energy_prod_type(start_time='20181123', end_time='20190111', key_path="G:\My Drive\VU Amsterdam\Year 3\Bachelor Project\entsoe_token.txt")
+    df = client.query_wind_and_solar_forecast(country_code=country, start=start, end=end)
+    df.to_csv(out)
 
 
 PROD_CAT = {
@@ -90,3 +114,9 @@ PROD_CAT = {
     'Substation' : {'renewable' : False, 'green' : False},
     'Transformer' : {'renewable' : False, 'green' : False},
 }
+
+if __name__ == "__main__":
+    start = pd.Timestamp('20181123', tz='Europe/Amsterdam')
+    end = pd.Timestamp('20190111', tz='Europe/Amsterdam')
+    fetch_energy_prod(start, end, key_path="G:\My Drive\VU Amsterdam\Year 3\Bachelor Project\entsoe_token.txt")
+
