@@ -1,13 +1,6 @@
-from sqlite3 import Timestamp
-from tkinter.tix import Tree
 import pandas as pd
-from entsoe import EntsoePandasClient, mappings
-from pyparsing import col
-
-def get_key(path):
-    with open(path, "r") as file:
-        return file.read().strip()
-
+from entsoe import mappings
+from entsoe_caching import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast
 
 def calc_total_prod(df: pd.DataFrame):
     if 'total_prod' in df:
@@ -15,11 +8,10 @@ def calc_total_prod(df: pd.DataFrame):
 
     df['total_prod'] = df.loc[:, df.columns.isin(list(PROD_CAT))].sum(axis=1)
 
-def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: Timestamp, end:Timestamp):
-    client = EntsoePandasClient(api_key=get_key(key_path))
+def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: pd.Timestamp, end:pd.Timestamp):
 
     for neighbour_code in mappings.NEIGHBOURS['country']:
-        neighbour_flow = client.query_crossborder_flows(country, neighbour_code, start, end)
+        neighbour_flow = cached_query_crossborder_flows(country, neighbour_code, start, end)
         neighbour_prod = fetch_energy_prod(start, end, key_path, neighbour_code)
 
         assert(neighbour_flow.shape[0] == neighbour_prod.shape[0], "Fetch Border Error: Flow data and production data do not match")
@@ -37,10 +29,9 @@ def _fetch_cross_border(df: pd.DataFrame, key_path, country, start: Timestamp, e
                 df[column] = neighbour_prod[column + '_flow']
         
 
-def fetch_energy_prod(start: Timestamp, end: Timestamp, key_path, country='NL', get_bordering=False):
-    client = EntsoePandasClient(api_key=get_key(key_path))
+def fetch_energy_prod(start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', get_bordering=True):
     
-    df = client.query_generation(country, start=start, end=end)
+    df = cached_query_generation(country, start, end, key_path)
 
     # Cleanup
 
@@ -51,9 +42,19 @@ def fetch_energy_prod(start: Timestamp, end: Timestamp, key_path, country='NL', 
     df.columns = df.columns.droplevel(-1)
 
     if get_bordering():
-        _fetch_cross_border(df, client, country, start, end)
+        _fetch_cross_border(df, country, start, end)
 
     return df
+
+def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, key_path, out, country='NL'):
+
+    df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end)
+    df = df.fillna(0)
+
+    df.to_csv(out)
+
+def merge_dc_grid(df_grid: pd.DataFrame, df_dc: pd.DataFrame):
+    pass
 
 def compute_energy_prod_ratios(df: pd.DataFrame):
     columns = df.columns()
@@ -91,18 +92,6 @@ def compute_dc_cons_by_type_naive(df: pd.DataFrame):
     for column in df.columns():
         if column in PROD_CAT.keys():
             df['dc_cons_' + column] = (df[column] / df['total_prod']) * df['dc_power_total']
-
-def merge_dc_grid(df_grid: pd.DataFrame, df_dc: pd.DataFrame):
-    pass
-
-def fetch_generation_forecast_csv(start: Timestamp, end: Timestamp, key_path, out, country='NL'):
-    client = EntsoePandasClient(api_key=get_key(key_path))
-
-    df = client.query_wind_and_solar_forecast(country_code=country, start=start, end=end)
-    df = df.fillna(0)
-
-    df.to_csv(out)
-
 
 def compute_apcren(df: pd.DataFrame):
     assert('dc_power_total' in df, "Dataframe does not contain DC power usage")
