@@ -54,7 +54,8 @@ def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, key_pa
     df.to_csv(out)
 
 def merge_dc_grid(df_grid: pd.DataFrame, df_dc: pd.DataFrame):
-    pass
+    assert(df_grid.index[0] == df_dc.index[0], "DC start time does not match grid start time")
+    assert(df_grid.index[-1] == df_dc.index[-1], "DC end time does nto match grid end time")
 
 def compute_energy_prod_ratios(df: pd.DataFrame):
     columns = df.columns()
@@ -110,7 +111,6 @@ def compute_apcren(df: pd.DataFrame):
 def compute_total_co2(df: pd.DataFrame):
     pass
 
-
 def compute_power_cost():
     pass
 
@@ -128,8 +128,6 @@ def compute_sustainability_metrics(df: pd.DataFrame, out):
 
 PROD_CAT = {
     'Mixed' : {'renewable' : False, 'green' : False},
-    'Generation' : {'renewable' : False, 'green' : False},
-    'Load' : {'renewable' : False, 'green' : False},
     'Biomass' : {'renewable' : True, 'green' : True},
     'Fossil Brown coal/Lignite' : {'renewable' : False, 'green' : False},
     'Fossil Coal-derived gas' : {'renewable' : False, 'green' : False},
@@ -150,10 +148,6 @@ PROD_CAT = {
     'Wind Offshore' : {'renewable' : True, 'green' : True},
     'Wind Onshore' : {'renewable' : True, 'green' : True},
     'Other' : {'renewable' : False, 'green' : False},
-    'AC Link' : {'renewable' : False, 'green' : False},
-    'DC Link' : {'renewable' : False, 'green' : False},
-    'Substation' : {'renewable' : False, 'green' : False},
-    'Transformer' : {'renewable' : False, 'green' : False},
 }
 
 if __name__ == "__main__":
