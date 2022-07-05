@@ -108,8 +108,18 @@ def compute_apcren(df: pd.DataFrame):
     return APCren
 
 
-def compute_total_co2(df: pd.DataFrame):
-    pass
+def compute_total_co2(df: pd.DataFrame, assume):
+    if assume == 'best':
+        co2_df = pd.read_csv("opendc-eesr/analysis/data/LCA_CO2_BEST.csv")
+    elif assume == 'worst':
+        co2_df = pd.read_csv("opendc-eesr/analysis/data/LCA_CO2_Worst.csv")
+
+    df['total_co2'] = 0
+
+    for column in df.columns():
+        if 'dc_cons_' in column:
+            df['total_co2'] = df['total_co2'] + (co2_df.loc[[column[8:-1], 'CO2 [gCO2/kWh]']] * df[column])
+   
 
 def compute_power_cost():
     pass
