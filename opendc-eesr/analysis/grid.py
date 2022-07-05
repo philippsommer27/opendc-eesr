@@ -119,6 +119,8 @@ def compute_total_co2(df: pd.DataFrame, assume):
     for column in df.columns():
         if 'dc_cons_' in column:
             df['total_co2'] = df['total_co2'] + (co2_df.loc[[column[8:-1], 'CO2 [gCO2/kWh]']] * df[column])
+
+    return df['total_co2'].sum()
    
 
 def compute_power_cost():
