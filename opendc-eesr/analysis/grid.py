@@ -56,6 +56,7 @@ def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, key_pa
 def merge_dc_grid(df_grid: pd.DataFrame, df_dc: pd.DataFrame):
     assert(df_grid.index[0] == df_dc.index[0], "DC start time does not match grid start time")
     assert(df_grid.index[-1] == df_dc.index[-1], "DC end time does nto match grid end time")
+    pass
 
 def compute_energy_prod_ratios(df: pd.DataFrame):
     columns = df.columns()
@@ -68,21 +69,48 @@ def compute_energy_prod_ratios(df: pd.DataFrame):
     df['non_green_total'] = 0
 
     for column in columns:
-        if PROD_CAT[column]['renewable']:
-            df['renewable_total'] += df[column]
-        else:
-            df['non_renewable_total'] += df[column]
+        if column in PROD_CAT.keys():
+            if PROD_CAT[column]['renewable']:
+                df['renewable_total'] += df[column]
+            else:
+                df['non_renewable_total'] += df[column]
 
 
-        if PROD_CAT[column]['green']:
-            df['green_total'] += df[column]
-        else:
-            df['non_green_total'] += df[column]
+            if PROD_CAT[column]['green']:
+                df['green_total'] += df[column]
+            else:
+                df['non_green_total'] += df[column]
 
     df['renewable_perc'] = df['renewable_total'] / df['total_prod']
     df['non_renewable_perc'] = df['non_renewable_total'] / df['total_prod']
     df['green_perc'] = df['green_total'] / df['total_prod']
     df['non_green_perc'] = df['non_green_total'] / df['total_prod']
+
+
+def compute_dc_energy_prod_ratios(df: pd.DataFrame):
+    columns = df.columns()
+
+    calc_total_prod(df)
+
+    df['dc_renewable_total'] = 0
+    df['dc_non_renewable_total'] = 0
+    df['dc_green_total'] = 0
+    df['dc_non_green_total'] = 0
+
+    for column in columns:
+        if 'dc_cons_' in column:
+            prod_type = column[8:-1]
+            if PROD_CAT[prod_type]['renewable']:
+                df['dc_renewable_total'] += df[column]
+            else:
+                df['dc_non_renewable_total'] += df[column]
+
+
+            if PROD_CAT[prod_type]['green']:
+                df['dc_green_total'] += df[column]
+            else:
+                df['dc_non_green_total'] += df[column]
+
 
 
 def compute_dc_cons_by_type_naive(df: pd.DataFrame):
@@ -123,19 +151,27 @@ def compute_total_co2(df: pd.DataFrame, assume):
     return df['total_co2'].sum()
    
 
-def compute_power_cost():
+def compute_power_cost(df: pd.DataFrame):
     pass
 
-def compute_gec():
-    pass
+def compute_gec_green(df: pd.DataFrame):
+    return df['cd_green_total'].sum() / df['dc_power_total'].sum()
 
-def compute_cue():
-    pass
+def compute_gec_renewable(df: pd.DataFrame):
+    return df['dc_renewable_total'].sum() / df['dc_power_total'].sum()
+
+def compute_cue(df: pd.DataFrame):
+    df['cue'] = df['total_co2'] / df['it_power_total']
+
+    return df['cue'].mean()
 
 def compute_nenr():
     pass
 
 def compute_sustainability_metrics(df: pd.DataFrame, out):
+    pass
+
+def save_df():
     pass
 
 PROD_CAT = {
