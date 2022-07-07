@@ -1,5 +1,6 @@
 from pathlib import Path
 import pickle
+import entsoe
 from entsoe import EntsoePandasClient
 from dataclasses import dataclass
 from pandas import DataFrame, Timestamp, read_pickle
@@ -40,14 +41,16 @@ def cache_lookup(query: CacheEntry) -> DataFrame:
     res = cache_map.get(query)
 
     if res is not None:
+        print("Cache Hit!")
         return read_pickle(res)
 
+    print("Cache Miss!")
     return res
 
 def cache_entry(query: CacheEntry, res: DataFrame):
     cache = load_map()
 
-    pickle_path = "opendc-eesr/analysis/cache/" + str(abs(query.__hash__())) + ".pkl"
+    pickle_path = "analysis/cache/" + str(abs(query.__hash__())) + ".pkl"
     res.to_pickle(pickle_path)
 
     cache[query] = pickle_path
@@ -76,8 +79,15 @@ def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, e
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
 
-        res = client.query_crossborder_flows(country_from, country_to, start, end)
-        cache_entry(query, res)
+
+        print(f"Getting crossborder {country_from} -> {country_to}")
+        try:
+            res = client.query_crossborder_flows(country_from, country_to, start=start, end=end)
+            
+            cache_entry(query, res)
+        except:
+            print("Error: crossborder flow is most likely empty")
+            return None
 
     return res
 

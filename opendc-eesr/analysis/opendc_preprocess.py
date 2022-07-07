@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
-from datetime import timedelta
 
-def process(path, offset_time=None, PUE=1):
+def process(path, offset_time=None, PUE=1.5):
 
     joule_to_kWh = lambda x: np.longdouble(x / (3.6e6))
 
@@ -23,7 +22,7 @@ def process(path, offset_time=None, PUE=1):
 
     df['it_power_total'] = joule_to_kWh(df['it_power_total'])
 
-    df['dc_power_total'] = df['dc_power_total'] * PUE
+    df['dc_power_total'] = df['it_power_total'] * PUE
 
     df.set_index('timestamp', inplace=True)
 

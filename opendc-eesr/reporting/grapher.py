@@ -4,8 +4,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 import numpy as np
-import seaborn as snNew
-import matplotlib.pyplot as pltNew
 
 def selector(name, **args):
     graph_func_lookup[name](args)

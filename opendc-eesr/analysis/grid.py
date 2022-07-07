@@ -1,18 +1,17 @@
 import pandas as pd
 from entsoe import mappings
-from entsoe_caching import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast
+from analysis import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast
 
 class GridAnalysis:
 
-    def __init__(self, df_dc, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', get_bordering=True) -> None:
+    def __init__(self, df_dc, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True) -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
-        self.keypath = key_path
-        self.coutry = country
-        self.get_bordering = get_bordering
-        self.df = self.fetch_energy_prod()
-        self.merge_dc_grid()
+        self.key_path = key_path
+        self.country = country
+        self.df = self.fetch_energy_prod(country)
+        self.merge_dc_grid(true_time=true_time)
 
     def calc_total_prod(self):
         if 'total_prod' in self.df:
@@ -20,28 +19,31 @@ class GridAnalysis:
 
         self.df['total_prod'] = self.df.loc[:, self.df.columns.isin(list(PROD_CAT))].sum(axis=1)
 
-    def _fetch_cross_border(self):
+    def _fetch_cross_border(self, df):
 
-        for neighbour_code in mappings.NEIGHBOURS['country']:
-            neighbour_flow = cached_query_crossborder_flows(self.country, self.neighbour_code, self.start, self.end)
-            neighbour_prod = self.fetch_energy_prod(self.start, self.end, self.key_path, neighbour_code)
-
-            assert(neighbour_flow.shape[0] == neighbour_prod.shape[0], "Fetch Border Error: Flow data and production data do not match")
+        for neighbour_code in mappings.NEIGHBOURS[self.country]:
+            neighbour_flow = cached_query_crossborder_flows(self.country, neighbour_code, self.start, self.end, self.key_path)
+            if neighbour_flow is None:
+                continue
             
-            columns = neighbour_prod.columns()
+            neighbour_prod = self.fetch_energy_prod(neighbour_code, False)
+
+            assert neighbour_flow.shape[0] == neighbour_prod.shape[0], f"Fetch Border Error: {neighbour_flow.shape[0]} and {neighbour_prod.shape[0]} do not match" 
+            
+            columns = neighbour_prod.columns
             neighbour_prod['total_prod'] = neighbour_prod.sum(axis=1)
 
             for column in columns:
                 neighbour_prod[column + '_perc'] = neighbour_prod[column] / neighbour_prod['total_prod']
                 neighbour_prod[column + '_flow'] = neighbour_prod[column + '_perc'] * neighbour_flow
 
-                if column in self.df.columns:
-                    self.df[column] = self.df[column] + neighbour_prod[column + '_flow']
+                if column in df.columns:
+                    df[column] = df[column] + neighbour_prod[column + '_flow']
                 else:
-                    self.df[column] = neighbour_prod[column + '_flow']
+                    df[column] = neighbour_prod[column + '_flow']
         
 
-    def fetch_energy_prod(self, country):
+    def fetch_energy_prod(self, country, get_bordering=True):
         
         df = cached_query_generation(country, self.start, self.end, self.key_path)
 
@@ -53,20 +55,24 @@ class GridAnalysis:
 
         df.columns = df.columns.droplevel(-1)
 
-        if self.get_bordering():
-            self._fetch_cross_border(df, self.country, self.start, self.end)
+        if get_bordering:
+            self._fetch_cross_border(df)
 
         return df
 
-    def merge_dc_grid(self):
-        assert(self.df.index[0] == self.df_dc.index[0], "DC start time does not match grid start time")
-        assert(self.df.index[-1] == self.df_dc.index[-1], "DC end time does not match grid end time")
-        assert(len(self.df) == len(self.df_dc), "Timeframes do not match")
+    def merge_dc_grid(self, true_time: bool):
+        assert len(self.df) == len(self.df_dc), "Timeframes do not match"
+        if not true_time:
+            assert self.df.index[0] == self.df_dc.index[0], "DC start time does not match grid start time" 
+            assert self.df.index[-1] == self.df_dc.index[-1], "DC end time does not match grid end time"
+            self.df = pd.concat([self.df, self.df_dc], axis=1)
 
-        return pd.concat([self.df, self.df_dc], axis=1)
+        self.df['dc_total_power'] = self.df_dc['dc_total_power']
+        self.df['it_total_power'] = self.df_dc['it_total_power']
+
 
     def compute_energy_prod_ratios(self):
-        columns = self.df.columns()
+        columns = self.df.columns
 
         self.calc_total_prod()
 
@@ -94,7 +100,7 @@ class GridAnalysis:
 
 
     def compute_dc_energy_prod_ratios(self):
-        columns = self.df.columns()
+        columns = self.df.columns
 
         self.calc_total_prod()
 
@@ -119,17 +125,17 @@ class GridAnalysis:
 
 
     def compute_dc_cons_by_type_naive(self):
-        assert('dc_power_total' in self.df, "Dataframe does not contain data center power consumption, consider calling merge_dc_grid()")
+        assert 'dc_power_total' in self.df, "Dataframe does not contain data center power consumption, consider calling merge_dc_grid()"
 
         self.calc_total_prod()
 
-        for column in self.df.columns():
+        for column in self.df.columns:
             if column in PROD_CAT.keys():
                 self.df['dc_cons_' + column] = (self.df[column] / self.df['total_prod']) * self.df['dc_power_total']
 
     def compute_apcren(self):
-        assert('dc_power_total' in self.df, "Dataframe does not contain DC power usage")
-        assert('renewable_total' in self.df, "Dataframe does not contain grid renewable consumption")
+        assert 'dc_power_total' in self.df, "Dataframe does not contain DC power usage" 
+        assert 'renewable_total' in self.df, "Dataframe does not contain grid renewable consumption" 
 
         dc_sum_consumption_mw = self.df['dc_power_total'] / 1000
         grid_sum_renewable_production = self.df['renewable_total']
@@ -149,7 +155,7 @@ class GridAnalysis:
 
         self.df['total_co2'] = 0
 
-        for column in self.df.columns():
+        for column in self.df.columns:
             if 'dc_cons_' in column:
                 self.df['total_co2'] = self.df['total_co2'] + (co2_df.loc[[column[8:-1], 'CO2 [gCO2/kWh]']] * self.df[column])
 
@@ -196,7 +202,6 @@ class GridAnalysis:
         return res
 
 
-        
 
 def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, country='NL'):
 
@@ -230,4 +235,7 @@ PROD_CAT = {
 }
 
 if __name__ == "__main__":
-    pass
+    start = pd.Timestamp('20181123', tz='Europe/Amsterdam')
+    end = pd.Timestamp('20190111', tz='Europe/Amsterdam')
+
+    grid_analysis = GridAnalysis()
