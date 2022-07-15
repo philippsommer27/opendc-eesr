@@ -4,6 +4,7 @@ import json
 import logging
 from util import inline
 from pandas import Timestamp
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,13 @@ def opendc_grid_analysis(dc_path, key_path, offset, start: Timestamp, end: Times
     analysis = GridAnalysis(df_dc, start, end, key_path, country)
     res = analysis.analyze()
 
+    return res
+
 if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
     trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
     offset = '20181123'
     start = Timestamp('20181123', tz='Europe/Amsterdam')
-    end = Timestamp('20190111', tz='Europe/Amsterdam')
+    end = Timestamp('20190110', tz='Europe/Amsterdam')
     key_path = "G:/My Drive/VU Amsterdam/Year 3/Bachelor Project/entsoe_token.txt"
     print(opendc_grid_analysis(trace, key_path, offset, start, end, 'NL'))

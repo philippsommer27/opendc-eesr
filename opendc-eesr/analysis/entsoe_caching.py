@@ -3,7 +3,7 @@ import pickle
 import entsoe
 from entsoe import EntsoePandasClient
 from dataclasses import dataclass
-from pandas import DataFrame, Timestamp, read_pickle
+from pandas import DataFrame, Timestamp, read_pickle, Timedelta
 from requests import get
 
 
@@ -71,6 +71,25 @@ def cached_query_generation(country, start: Timestamp, end: Timestamp, key_path)
 
     return res
 
+def crossborder_expand_time(df:DataFrame) -> DataFrame:
+    values = df.to_numpy()
+    indices = df.index.to_numpy(dtype=object)
+
+    new_values = []
+    new_indices = []
+
+    for val in values:
+        power = val/4
+        for _ in range(4): new_values.append(power)
+
+    for index in indices:
+        new_indices.append(index)
+        new_indices.append(index + Timedelta(15, 'm'))
+        new_indices.append(index + Timedelta(30, 'm'))
+        new_indices.append(index + Timedelta(45, 'm'))
+
+    return DataFrame(data=new_values, index=new_indices)
+
 def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, end: Timestamp, key_path):
     query = CacheEntry('A11', country_from, start, end, country_to)
 
@@ -79,11 +98,12 @@ def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, e
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
 
-
         print(f"Getting crossborder {country_from} -> {country_to}")
         try:
             res = client.query_crossborder_flows(country_from, country_to, start=start, end=end)
             
+            res = crossborder_expand_time(res)
+
             cache_entry(query, res)
         except:
             print("Error: crossborder flow is most likely empty")

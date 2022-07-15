@@ -4,13 +4,13 @@ from analysis import cached_query_generation, cached_query_crossborder_flows, ca
 
 class GridAnalysis:
 
-    def __init__(self, df_dc, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True) -> None:
+    def __init__(self, df_dc, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15min') -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
         self.key_path = key_path
         self.country = country
-        self.df = self.fetch_energy_prod(country)
+        self.df = self.fetch_energy_prod(country, get_bordering=False)
         self.merge_dc_grid(true_time=true_time)
 
     def calc_total_prod(self):
@@ -22,6 +22,7 @@ class GridAnalysis:
     def _fetch_cross_border(self, df):
 
         for neighbour_code in mappings.NEIGHBOURS[self.country]:
+            print("Doing neighbour", neighbour_code)
             neighbour_flow = cached_query_crossborder_flows(self.country, neighbour_code, self.start, self.end, self.key_path)
             if neighbour_flow is None:
                 continue
@@ -61,7 +62,10 @@ class GridAnalysis:
         return df
 
     def merge_dc_grid(self, true_time: bool):
-        assert len(self.df) == len(self.df_dc), "Timeframes do not match"
+        print(f"DC {self.df.index[0]} - {self.df.index[-1]}")
+        print(f"GRID {self.df_dc.index[0]} - {self.df_dc.index[-1]}")
+
+        assert len(self.df) == len(self.df_dc), f"Timeframes do not match: GRID {len(self.df)} DC {len(self.df_dc)}"
         if not true_time:
             assert self.df.index[0] == self.df_dc.index[0], "DC start time does not match grid start time" 
             assert self.df.index[-1] == self.df_dc.index[-1], "DC end time does not match grid end time"
