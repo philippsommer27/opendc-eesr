@@ -1,10 +1,59 @@
-from pandas import DataFrame, infer_freq, DateOffset
+from pandas import DataFrame, infer_freq, Timedelta
 
-def ensure_freq(df: DataFrame, wanted_freq):
-    freq = infer_freq(df.index)
+def ensure_freq(df: DataFrame, wanted_freq: Timedelta):
+    freq = Timedelta(infer_freq(df.index))
     if freq != wanted_freq:
-        resample(df, wanted_freq)
+        return resample(df, wanted_freq)
+    else:
+        return df
+
+def resample(df: DataFrame, wanted_freq: Timedelta):
+    freq = Timedelta(infer_freq(df.index))
+    if wanted_freq > freq:
+        df.resample('15Min', label='right', closed='right').sum()
+        return df
+    else:
+        if wanted_freq != Timedelta('15Min'): raise Exception("Currently only supports 15 minute timeframe for upsampling")
+        if freq == Timedelta('1H'):
+            return upsample_1H(df)
+        if freq == Timedelta('30M'):
+            return upsample_30M(df)
+        else:
+            raise Exception("Error: Something went wrong in freq conversion!")
+
+def upsample_1H(df: DataFrame):
+    values = df.to_numpy()
+    indices = df.index.to_numpy(dtype=object)
+
+    new_values = []
+    new_indices = []
+
+    for val in values:
+        power = val/4
+        for _ in range(4): new_values.append(power)
+
+    for index in indices:
+        new_indices.append(index - Timedelta(45, 'm'))
+        new_indices.append(index - Timedelta(30, 'm'))
+        new_indices.append(index - Timedelta(15, 'm'))
+        new_indices.append(index)
+
+    return DataFrame(data=new_values, index=new_indices)
 
 
-def resample(df: DataFrame, freq):
-    
+def upsample_30M(df: DataFrame):
+    values = df.to_numpy()
+    indices = df.index.to_numpy(dtype=object)
+
+    new_values = []
+    new_indices = []
+
+    for val in values:
+        power = val/2
+        for _ in range(2): new_values.append(power)
+
+    for index in indices:
+        new_indices.append(index - Timedelta(15, 'm'))
+        new_indices.append(index)
+
+    return DataFrame(data=new_values, index=new_indices)

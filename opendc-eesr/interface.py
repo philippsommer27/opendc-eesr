@@ -43,6 +43,6 @@ if __name__ == '__main__':
     trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
     offset = '20181123'
     start = Timestamp('20181123', tz='Europe/Amsterdam')
-    end = Timestamp('20190110', tz='Europe/Amsterdam')
+    end = Timestamp('20190212', tz='Europe/Amsterdam')
     key_path = "G:/My Drive/VU Amsterdam/Year 3/Bachelor Project/entsoe_token.txt"
     print(opendc_grid_analysis(trace, key_path, offset, start, end, 'NL'))

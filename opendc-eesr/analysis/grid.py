@@ -1,15 +1,16 @@
 import pandas as pd
 from entsoe import mappings
-from analysis import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast
+from analysis import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast, ensure_freq
 
 class GridAnalysis:
 
-    def __init__(self, df_dc, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15min') -> None:
+    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq=pd.Timedelta('15T')) -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
         self.key_path = key_path
         self.country = country
+        self.freq = freq
         self.df = self.fetch_energy_prod(country, get_bordering=False)
         self.merge_dc_grid(true_time=true_time)
 
@@ -24,6 +25,7 @@ class GridAnalysis:
         for neighbour_code in mappings.NEIGHBOURS[self.country]:
             print("Doing neighbour", neighbour_code)
             neighbour_flow = cached_query_crossborder_flows(self.country, neighbour_code, self.start, self.end, self.key_path)
+            neighbour_flow = ensure_freq(neighbour_flow, self.freq)
             if neighbour_flow is None:
                 continue
             
@@ -49,12 +51,14 @@ class GridAnalysis:
         df = cached_query_generation(country, self.start, self.end, self.key_path)
 
         # Cleanup
-
+        
         df = df.fillna(0)
         df.loc[:, (df != 0).any(axis=0)]
         df.drop(list(df.filter(regex = 'Consumption')), axis = 1, inplace = True)
 
         df.columns = df.columns.droplevel(-1)
+
+        df = ensure_freq(df, self.freq)
 
         if get_bordering:
             self._fetch_cross_border(df)
@@ -62,10 +66,20 @@ class GridAnalysis:
         return df
 
     def merge_dc_grid(self, true_time: bool):
-        print(f"DC {self.df.index[0]} - {self.df.index[-1]}")
-        print(f"GRID {self.df_dc.index[0]} - {self.df_dc.index[-1]}")
+        print(f"GRID {self.df.index[0]} - {self.df.index[-1]}")
+        print(f"DC {self.df_dc.index[0]} - {self.df_dc.index[-1]}")
 
+        assert abs(len(self.df) - len(self.df_dc)) < 100, f"Timeframes do not match: GRID {len(self.df)} DC {len(self.df_dc)}"
+
+        #Truncate to match timeframe
+        diff = abs(len(self.df) - len(self.df_dc))
+        if len(self.df) > len(self.df_dc):
+            self.df.drop(self.df.tail(len(diff).index, inplace = True))
+        elif len(self.df) < len(self.df_dc):
+            self.df_dc.drop(self.df_dc.tail( diff).index, inplace = True)
+            
         assert len(self.df) == len(self.df_dc), f"Timeframes do not match: GRID {len(self.df)} DC {len(self.df_dc)}"
+
         if not true_time:
             assert self.df.index[0] == self.df_dc.index[0], "DC start time does not match grid start time" 
             assert self.df.index[-1] == self.df_dc.index[-1], "DC end time does not match grid end time"
@@ -207,9 +221,10 @@ class GridAnalysis:
 
 
 
-def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, country='NL'):
+def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, country='NL', freq=pd.Timedelta('15Min')):
 
     df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end)
+    df = ensure_freq(df, freq)
     df = df.fillna(0)
 
     df.to_csv(out)
