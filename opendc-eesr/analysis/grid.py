@@ -4,7 +4,7 @@ from analysis import cached_query_generation, cached_query_crossborder_flows, ca
 
 class GridAnalysis:
 
-    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq=pd.Timedelta('15T')) -> None:
+    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15T') -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
@@ -35,6 +35,9 @@ class GridAnalysis:
             
             columns = neighbour_prod.columns
             neighbour_prod['total_prod'] = neighbour_prod.sum(axis=1)
+
+            print(list(columns))
+
 
             for column in columns:
                 neighbour_prod[column + '_perc'] = neighbour_prod[column] / neighbour_prod['total_prod']
@@ -221,9 +224,9 @@ class GridAnalysis:
 
 
 
-def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, country='NL', freq=pd.Timedelta('15Min')):
+def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, key, country='NL', freq='15Min'):
 
-    df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end)
+    df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end, key_path=key)
     df = ensure_freq(df, freq)
     df = df.fillna(0)
 

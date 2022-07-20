@@ -1,22 +1,22 @@
 from pandas import DataFrame, infer_freq, Timedelta
 
-def ensure_freq(df: DataFrame, wanted_freq: Timedelta):
-    freq = Timedelta(infer_freq(df.index))
+def ensure_freq(df: DataFrame, wanted_freq):
+    freq = infer_freq(df.index)
     if freq != wanted_freq:
         return resample(df, wanted_freq)
     else:
         return df
 
-def resample(df: DataFrame, wanted_freq: Timedelta):
-    freq = Timedelta(infer_freq(df.index))
+def resample(df: DataFrame, wanted_freq):
+    freq = infer_freq(df.index)
     if wanted_freq > freq:
         df.resample('15Min', label='right', closed='right').sum()
         return df
     else:
-        if wanted_freq != Timedelta('15Min'): raise Exception("Currently only supports 15 minute timeframe for upsampling")
-        if freq == Timedelta('1H'):
+        if wanted_freq != '15T': raise Exception("Currently only supports 15 minute timeframe for upsampling")
+        if freq == 'H':
             return upsample_1H(df)
-        if freq == Timedelta('30M'):
+        if freq == Timedelta('30T'):
             return upsample_30M(df)
         else:
             raise Exception("Error: Something went wrong in freq conversion!")
@@ -38,7 +38,7 @@ def upsample_1H(df: DataFrame):
         new_indices.append(index - Timedelta(15, 'm'))
         new_indices.append(index)
 
-    return DataFrame(data=new_values, index=new_indices)
+    return DataFrame(data=new_values, index=new_indices, columns=df.columns)
 
 
 def upsample_30M(df: DataFrame):
@@ -56,4 +56,4 @@ def upsample_30M(df: DataFrame):
         new_indices.append(index - Timedelta(15, 'm'))
         new_indices.append(index)
 
-    return DataFrame(data=new_values, index=new_indices)
+    return DataFrame(data=new_values, index=new_indices, columns=df.columns)
