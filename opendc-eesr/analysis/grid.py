@@ -85,8 +85,8 @@ class GridAnalysis:
             assert self.df.index[-1] == self.df_dc.index[-1], "DC end time does not match grid end time"
             self.df = pd.concat([self.df, self.df_dc], axis=1)
 
-        self.df['dc_total_power'] = self.df_dc['dc_total_power']
-        self.df['it_total_power'] = self.df_dc['it_total_power']
+        self.df['dc_power_total'] = self.df_dc['dc_power_total']
+        self.df['it_power_total'] = self.df_dc['it_power_total']
 
 
     def compute_energy_prod_ratios(self):
@@ -198,8 +198,8 @@ class GridAnalysis:
     def compute_nenr(self):
         pass
 
-    def analyze(self, out):
-        self.fetch_energy_prod()
+    def analyze(self, out=''):
+        self.fetch_energy_prod(self.country)
         self.compute_dc_cons_by_type_naive()
         self.compute_energy_prod_ratios()
         self.compute_dc_energy_prod_ratios()
