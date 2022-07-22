@@ -24,10 +24,15 @@ class HTMLBuilder:
         self.metrics_library = load_json('reporting/library/metrics_library.json')
         self.data = data
 
-    def __build_metric_div(self, name, value, icon, rating=None):
+    def __build_metric_div(self, name, value, icon, link, rating=None):
         return div(_class="h-organizer").html(
             div(_class="item-left").html(
-                h1(_class="metric-text").html(name)
+                h1(_class="metric-text").html(
+                    a(name,
+                    _href=link,
+                    _target="_blank",
+                    _class="a-remover"
+                    ))
             ),
             div(_class="item-left").html(
                 span(_class=(
@@ -47,7 +52,7 @@ class HTMLBuilder:
             div(_class="item-right").html(
                 img(_class="energy-icon", src="template/content/rating_ap.svg")
                 if value == "A+" else
-                h2(_class="metric-text").html(value)
+                h2(_class="metric-text").html(f'{value:.2f}')
             )
         )
 
@@ -77,8 +82,9 @@ class HTMLBuilder:
         for metric in self.profile['builtin_metrics']:
             value = self.data['builtin_metrics'][metric]
             icon = self.metrics_library[metric]['icon']
+            link = self.metrics_library[metric]['documentation']
 
-            metrics_append.append(self.__build_metric_div(metric, value, icon))
+            metrics_append.append(self.__build_metric_div(metric, value, icon, link))
 
     def generate_meta(self):
         bottom_name_append = self.page.getElementById("bottomNameAppend")

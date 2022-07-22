@@ -1,0 +1,23 @@
+{
+    "builtin_metrics": {
+        "CO2": 9671.213294422976,
+        "GEC": 0.10058355730685037,
+        "APCr": 0.6201827824448525,
+        "CUE": 99.48755067781893,
+        "PUE": 1.5
+    },
+    "metadata" : {
+        "start_date" : "2018-11-13",
+        "end_date" : "2019-4-23",
+        "environment" : "OpenDC Simulator",
+        "environment_link" : "https://opendc.org/"
+    },    
+    "graph_comment" : "No significant adaptation of energy consumption.",
+    "domain": [{
+        "name": "Total Energy Use (MWh)",
+        "value": 64.86001774183482
+    }, {
+        "name": "Job Success Ratio (%)",
+        "value": 98.96
+    }]
+}

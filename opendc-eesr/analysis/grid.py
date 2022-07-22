@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 from entsoe import mappings
 from analysis import cached_query_generation, cached_query_crossborder_flows, cached_query_wind_and_solar_forecast, ensure_freq
 
@@ -187,14 +188,14 @@ class GridAnalysis:
             if 'dc_cons_' in column:
                 self.df['total_co2'] = self.df['total_co2'] + (co2_df.loc[co2_df['TYPE'] == column[8:], 'CO2 [gCO2/kWh]'].values[0] * self.df[column])
 
-        return self.df['total_co2'].sum()
+        return self.df['total_co2'].sum() / 1000
   
 
     def compute_power_cost(self):
         pass
 
     def compute_gec_green(self):
-        return self.df['cd_green_total'].sum() / self.df['dc_power_total'].sum()
+        return self.df['dc_green_total'].sum() / self.df['dc_power_total'].sum()
 
     def compute_gec_renewable(self):
         return self.df['dc_renewable_total'].sum() / self.df['dc_power_total'].sum()
@@ -203,8 +204,11 @@ class GridAnalysis:
         self.df['cue'] = self.df['total_co2'] / self.df['it_power_total']
 
         return self.df['cue'].mean()
+    
+    def compute_total_power(self):
+        return self.df['dc_power_total'].sum() / 1000
 
-    def analyze(self, out='', assume='best'):
+    def analyze(self, out, assume='best'):
         self.compute_dc_cons_by_type_naive()
         self.compute_energy_prod_ratios()
         self.compute_dc_energy_prod_ratios()
@@ -212,17 +216,30 @@ class GridAnalysis:
         CO2 = self.compute_total_co2(assume)
         GEC = self.compute_gec_renewable()
         CUE = self.compute_cue()
+        power = self.compute_total_power()
 
         res = {
             "builtin_metrics" : {
                 "CO2" : CO2,
                 "GEC" : GEC,
                 "APCr" : APCren,
-                "CUE" : CUE
-            }
+                "CUE" : CUE,
+                "PUE" : 1.5
+            },
+            "domain" : [
+                {
+                    "name" : "Total Energy Use (MWh)",
+                    "value" : power
+                },
+                {
+                    "name" : "Job Success Ratio (%)",
+                    "value" : 98.96
+                }
+            ]
         }
 
-        return res
+        with open(out, 'w') as fp:
+            json.dump(res, fp)
 
 def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, key, country='NL', freq='15Min'):
 
