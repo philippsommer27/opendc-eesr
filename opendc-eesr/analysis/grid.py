@@ -5,7 +5,7 @@ from analysis import cached_query_generation, cached_query_crossborder_flows, ca
 
 class GridAnalysis:
 
-    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15T') -> None:
+    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15T', caching=True) -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
@@ -13,6 +13,7 @@ class GridAnalysis:
         self.country = country
         self.freq = freq
         self.df = self.fetch_energy_prod(country, get_bordering=True)
+        self.caching = caching
 
         self.df = self.df.fillna(0)
         self.df.loc[:, (self.df != 0).any(axis=0)]    
@@ -29,7 +30,7 @@ class GridAnalysis:
 
         for neighbour_code in mappings.NEIGHBOURS[self.country]:
             # print("Doing neighbour", neighbour_code)
-            neighbour_flow = cached_query_crossborder_flows(self.country, neighbour_code, self.start, self.end, self.key_path)
+            neighbour_flow = cached_query_crossborder_flows(self.country, neighbour_code, self.start, self.end, self.key_path, self.caching)
             if neighbour_flow is None or neighbour_flow.sum() == 0:
                 print("Skipping neighbour...")
                 continue
@@ -56,7 +57,7 @@ class GridAnalysis:
 
     def fetch_energy_prod(self, country, get_bordering=True):
         
-        df = cached_query_generation(country, self.start, self.end, self.key_path)
+        df = cached_query_generation(country, self.start, self.end, self.key_path, self.caching)
 
         # Cleanup
         
@@ -230,10 +231,6 @@ class GridAnalysis:
                 {
                     "name" : "Total Energy Use (MWh)",
                     "value" : power
-                },
-                {
-                    "name" : "Job Success Ratio (%)",
-                    "value" : 98.96
                 }
             ]
         }
@@ -241,9 +238,9 @@ class GridAnalysis:
         with open(out, 'w') as fp:
             json.dump(res, fp)
 
-def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, key, country='NL', freq='15Min'):
+def fetch_generation_forecast_csv(start: pd.Timestamp, end: pd.Timestamp, out, key, country='NL', freq='15Min', caching=True):
 
-    df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end, key_path=key)
+    df = cached_query_wind_and_solar_forecast(country_code=country, start=start, end=end, key_path=key, caching=caching)
     df = ensure_freq(df, freq)
     df = df.fillna(0)
 
@@ -274,7 +271,4 @@ PROD_CAT = {
 }
 
 if __name__ == "__main__":
-    start = pd.Timestamp('20181123', tz='Europe/Amsterdam')
-    end = pd.Timestamp('20190111', tz='Europe/Amsterdam')
-
-    grid_analysis = GridAnalysis()
+    pass

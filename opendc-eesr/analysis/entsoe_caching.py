@@ -1,10 +1,8 @@
 from pathlib import Path
 import pickle
-import entsoe
 from entsoe import EntsoePandasClient
 from dataclasses import dataclass
 from pandas import DataFrame, Timestamp, read_pickle, Timedelta
-from requests import get
 
 
 @dataclass(frozen=True, eq=True)
@@ -35,7 +33,10 @@ def store_map(map: dict):
     with open(file, 'wb') as f:
         pickle.dump(map, f)
 
-def cache_lookup(query: CacheEntry) -> DataFrame:
+def cache_lookup(query: CacheEntry, do_caching=True) -> DataFrame:
+    if not do_caching:
+        return None
+
     cache_map = load_map()
 
     res = cache_map.get(query)
@@ -47,7 +48,10 @@ def cache_lookup(query: CacheEntry) -> DataFrame:
     # print("Cache Miss!")
     return res
 
-def cache_entry(query: CacheEntry, res: DataFrame):
+def cache_entry(query: CacheEntry, res: DataFrame, do_caching=True):
+    if not do_caching:
+        return
+
     cache = load_map()
 
     pickle_path = "analysis/cache/" + str(abs(query.__hash__())) + ".pkl"
@@ -58,27 +62,27 @@ def cache_entry(query: CacheEntry, res: DataFrame):
     store_map(cache)
 
 
-def cached_query_generation(country, start: Timestamp, end: Timestamp, key_path):
+def cached_query_generation(country, start: Timestamp, end: Timestamp, key_path, do_caching=True):
     # print(f"Getting prod {country}")
         
     query = CacheEntry('A75', country, start, end)
     
-    res = cache_lookup(query)
+    res = cache_lookup(query, do_caching)
 
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
 
         res = client.query_generation(country, start=start, end=end)
-        cache_entry(query, res)
+        cache_entry(query, res, do_caching)
 
     return res
 
-def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, end: Timestamp, key_path):
+def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, end: Timestamp, key_path, do_caching=True):
     # print(f"Getting crossborder {country_from} -> {country_to}")
     
     query = CacheEntry('A11', country_from, start, end, country_to)
 
-    res = cache_lookup(query)
+    res = cache_lookup(query, do_caching)
 
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
@@ -86,22 +90,22 @@ def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, e
         try:
             res = client.query_crossborder_flows(country_from, country_to, start=start, end=end)
             
-            cache_entry(query, res)
+            cache_entry(query, res, do_caching)
         except:
             print("Error: crossborder flow is most likely empty")
             return None
 
     return res
 
-def cached_query_wind_and_solar_forecast(country, start: Timestamp, end: Timestamp, key_path):
+def cached_query_wind_and_solar_forecast(country, start: Timestamp, end: Timestamp, key_path, do_caching=True):
     query = CacheEntry('A69', country, start, end)
 
-    res = cache_lookup(query)
+    res = cache_lookup(query, do_caching)
 
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
 
         res = client.query_wind_and_solar_forecast(country, start, end)
-        cache_entry(query, res)
+        cache_entry(query, res, do_caching)
 
     return res

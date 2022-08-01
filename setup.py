@@ -1,12 +1,18 @@
 from setuptools import setup
 
-requirements = ['domonic']
+requirements = ['domonic',
+     'html5lib',
+     'plotly',
+     'pandas',
+     'numpy',
+     'entsoe-py'
+     ]
 
 setup(
     name='opendc-eesr',
     version='0.0.1',    
     description='An OpenDC extension for reporting energy efficiency and sustanability.',
-    url='',
+    url='https://github.com/philippsommer27/opendc-eesr',
     author='Philipp Sommerhalter',
     author_email='philippsommerhalter@gmail.com',
     license='Apache Software License 2.0',
