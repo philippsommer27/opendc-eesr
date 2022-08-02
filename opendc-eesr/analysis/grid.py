@@ -5,16 +5,26 @@ from analysis import cached_query_generation, cached_query_crossborder_flows, ca
 
 class GridAnalysis:
 
-    def __init__(self, df_dc:pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp, key_path, country='NL', true_time=True, freq='15T', caching=True) -> None:
+    def __init__(self, 
+    df_dc:pd.DataFrame,
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    key_path,
+    country='NL',
+    true_time=True,
+    freq='15T',
+    caching=True,
+    green_ratio=None,
+    ) -> None:
         self.df_dc = df_dc
         self.start = start
         self.end = end
         self.key_path = key_path
         self.country = country
         self.freq = freq
-        self.df = self.fetch_energy_prod(country, get_bordering=True)
         self.caching = caching
-
+        self.green_ratio=green_ratio
+        self.df = self.fetch_energy_prod(country, get_bordering=True)
         self.df = self.df.fillna(0)
         self.df.loc[:, (self.df != 0).any(axis=0)]    
 
@@ -154,14 +164,39 @@ class GridAnalysis:
                     self.df['dc_non_green_total'] += self.df[column]
 
 
-    def compute_dc_cons_by_type_naive(self):
+    def compute_dc_cons_by_type(self):
         assert 'dc_power_total' in self.df, "Dataframe does not contain data center power consumption, consider calling merge_dc_grid()"
-
+        
         self.calc_total_prod()
+        
 
-        for column in self.df.columns:
-            if column in PROD_CAT.keys():
-                self.df['dc_cons_' + column] = (self.df[column] / self.df['total_prod']) * self.df['dc_power_total']
+        #Calc based on assumed 'greeness'
+        if self.green_ratio is not None:
+            difference_ren = self.green_ratio - self.df['renewable_perc']
+            difference_non_ren = 1 - difference_ren
+            assert not any(difference_ren<0), "Not all time entries had less than green_ratio"
+            assert not any(difference_non_ren<0), "Not all time entries had less than green_ratio"
+            
+            self.df['temp_total'] = 0 
+
+            for column in self.df.columns:
+                if column in PROD_CAT.keys():
+                    ratio = self.df[column] / self.df['total_prod']
+                    if PROD_CAT[column]['renewable']:
+                        new_ratio = (((ratio * difference_ren) / self.df['renewable_perc']) + ratio)
+                        self.df['dc_cons_' + column] = new_ratio * self.df['dc_power_total']
+                    else:
+                        new_ratio = (ratio - ((ratio * difference_non_ren) / self.df['non_renewable_perc']))
+                        self.df['dc_cons_' + column] =  new_ratio * self.df['dc_power_total']
+
+                    self.df['temp_total'] += self.df['dc_cons_' + column]
+            print(self.df['dc_power_total'].head(10))
+            print(self.df['temp_total'].head(10))
+        #Naive
+        else:
+            for column in self.df.columns:
+                if column in PROD_CAT.keys():
+                    self.df['dc_cons_' + column] = (self.df[column] / self.df['total_prod']) * self.df['dc_power_total']
 
     def compute_apcren(self):
         assert 'dc_power_total' in self.df, "Dataframe does not contain DC power usage" 
@@ -191,10 +226,6 @@ class GridAnalysis:
 
         return self.df['total_co2'].sum() / 1000
   
-
-    def compute_power_cost(self):
-        pass
-
     def compute_gec_green(self):
         return self.df['dc_green_total'].sum() / self.df['dc_power_total'].sum()
 
@@ -210,8 +241,8 @@ class GridAnalysis:
         return self.df['dc_power_total'].sum() / 1000
 
     def analyze(self, out, assume='best'):
-        self.compute_dc_cons_by_type_naive()
         self.compute_energy_prod_ratios()
+        self.compute_dc_cons_by_type()
         self.compute_dc_energy_prod_ratios()
         APCren = self.compute_apcren()
         CO2 = self.compute_total_co2(assume)
@@ -224,8 +255,7 @@ class GridAnalysis:
                 "CO2" : CO2,
                 "GEC" : GEC,
                 "APCr" : APCren,
-                "CUE" : CUE,
-                "PUE" : 1.5
+                "CUE" : CUE
             },
             "domain" : [
                 {
@@ -264,7 +294,7 @@ PROD_CAT = {
     'Nuclear' : {'renewable' : False, 'green' : True},
     'Other renewable' : {'renewable' : True, 'green' : True},
     'Solar' : {'renewable' : True, 'green' : True},
-    'Waste' : {'renewable' : True, 'green' : True},
+    'Waste' : {'renewable' : False, 'green' : False},
     'Wind Offshore' : {'renewable' : True, 'green' : True},
     'Wind Onshore' : {'renewable' : True, 'green' : True},
     'Other' : {'renewable' : False, 'green' : False},
