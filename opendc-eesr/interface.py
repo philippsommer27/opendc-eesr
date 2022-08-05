@@ -41,8 +41,8 @@ def opendc_grid_analysis(dc_path, key_path, offset, start: Timestamp, end: Times
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
-    # trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
-    trace = "C:/Users/phili/Desktop/output/out.csv"
+    trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
+    # trace = "C:/Users/phili/Desktop/output/out.csv"
     offset = '20181123'
     start = Timestamp('20181123', tz='Europe/Amsterdam')
     end = Timestamp('20190212', tz='Europe/Amsterdam')

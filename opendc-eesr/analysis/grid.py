@@ -169,34 +169,36 @@ class GridAnalysis:
         
         self.calc_total_prod()
         
-
-        #Calc based on assumed 'greeness'
+        #Calc based on specified 'greeness'
         if self.green_ratio is not None:
-            difference_ren = self.green_ratio - self.df['renewable_perc']
-            difference_non_ren = 1 - difference_ren
-            assert not any(difference_ren<0), "Not all time entries had less than green_ratio"
-            assert not any(difference_non_ren<0), "Not all time entries had less than green_ratio"
+            # difference_ren = self.green_ratio - self.df['renewable_perc']
+            # difference_non_ren = self.green_ratio - self.df['non_renewable_perc']
+            # assert not any(difference_ren<0), "Not all time entries had less than green_ratio"
+            # assert not any(difference_non_ren<0), "Not all time entries had less than green_ratio"
             
-            self.df['temp_total'] = 0 
+            # for column in self.df.columns:
+            #     if column in PROD_CAT.keys():
+            #         ratio = self.df[column] / self.df['total_prod']
+            #         if PROD_CAT[column]['renewable']:
+            #             new_ratio = (((ratio / self.df['renewable_perc'])  * difference_ren) + ratio)
+            #             self.df['dc_cons_' + column] = new_ratio * self.df['dc_power_total']
+            #         else:
+            #             new_ratio = (ratio - ((ratio / self.df['non_renewable_perc'] ) * difference_non_ren))
+            #             self.df['dc_cons_' + column] =  new_ratio * self.df['dc_power_total']
+            for i in self.df.index:
+                for column in self.df.columns:
+                    if column in PROD_CAT.keys():
+                        ratio = self.df.at
 
-            for column in self.df.columns:
-                if column in PROD_CAT.keys():
-                    ratio = self.df[column] / self.df['total_prod']
-                    if PROD_CAT[column]['renewable']:
-                        new_ratio = (((ratio * difference_ren) / self.df['renewable_perc']) + ratio)
-                        self.df['dc_cons_' + column] = new_ratio * self.df['dc_power_total']
-                    else:
-                        new_ratio = (ratio - ((ratio * difference_non_ren) / self.df['non_renewable_perc']))
-                        self.df['dc_cons_' + column] =  new_ratio * self.df['dc_power_total']
-
-                    self.df['temp_total'] += self.df['dc_cons_' + column]
-            print(self.df['dc_power_total'].head(10))
-            print(self.df['temp_total'].head(10))
         #Naive
         else:
             for column in self.df.columns:
                 if column in PROD_CAT.keys():
-                    self.df['dc_cons_' + column] = (self.df[column] / self.df['total_prod']) * self.df['dc_power_total']
+                    perc = (self.df[column] / self.df['total_prod'])
+                    self.df['dc_cons_' + column] = perc * self.df['dc_power_total']
+
+        print(self.df['dc_power_total'].head(10))
+        print(self.df['total_perc'].head(10))
 
     def compute_apcren(self):
         assert 'dc_power_total' in self.df, "Dataframe does not contain DC power usage" 
