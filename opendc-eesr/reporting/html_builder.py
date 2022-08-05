@@ -8,7 +8,7 @@ from reporting import grapher
 class HTMLBuilder:
     __templates = {
         "std": "reporting/library/templates/std_template.html",
-        "concise": "",
+        "compact": "reporting/library/templates/compact_template.html",
         "dashboard": ""
     }
 

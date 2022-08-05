@@ -36,13 +36,13 @@ def to_pdf(report, out):
 def opendc_grid_analysis(dc_path, key_path, offset, start: Timestamp, end: Timestamp, country, out):
     df_dc = process(dc_path, offset)
     
-    analysis = GridAnalysis(df_dc, start, end, key_path, country, green_ratio=0.88)
-    res = analysis.analyze('result.json')
+    analysis = GridAnalysis(df_dc, start, end, key_path, country)
+    df = analysis.analyze('result.json')
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
-    trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
-    # trace = "C:/Users/phili/Desktop/output/out.csv"
+    # trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
+    trace = "C:/Users/phili/Desktop/output/out.csv"
     offset = '20181123'
     start = Timestamp('20181123', tz='Europe/Amsterdam')
     end = Timestamp('20190212', tz='Europe/Amsterdam')
@@ -50,5 +50,5 @@ if __name__ == '__main__':
     res = 'result1.json'
     opendc_grid_analysis(trace, key_path, offset, start, end, 'NL', res)
 
-    # generate_standard_profile(res, "sus_prof", True)
-    # to_pdf('report.html', 'report.pdf')
+    generate_standard_profile(res, "sus_prof", True)
+    to_pdf('report.html', 'report.pdf')
