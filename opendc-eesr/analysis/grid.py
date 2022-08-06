@@ -14,8 +14,6 @@ class GridAnalysis:
     def __init__(
         self,
         df_dc: pd.DataFrame,
-        start: pd.Timestamp,
-        end: pd.Timestamp,
         key_path,
         country="NL",
         true_time=True,
@@ -24,8 +22,8 @@ class GridAnalysis:
         green_ratio=None,
     ) -> None:
         self.df_dc = df_dc
-        self.start = start
-        self.end = end
+        self.start = self.df_dc.index[0]
+        self.end = self.df_dc.index[-1]
         self.key_path = key_path
         self.country = country
         self.freq = freq
@@ -34,6 +32,7 @@ class GridAnalysis:
         self.df = self.fetch_energy_prod(country, get_bordering=True)
         self.df = self.df.fillna(0)
         self.df.loc[:, (self.df != 0).any(axis=0)]
+        
 
         self.merge_dc_grid(true_time=true_time)
 
@@ -137,8 +136,8 @@ class GridAnalysis:
             ), "DC end time does not match grid end time"
             self.df = pd.concat([self.df, self.df_dc], axis=1)
 
-        self.df["dc_power_total"] = self.df_dc.iloc[:, 0].to_numpy()
-        self.df["it_power_total"] = self.df_dc.iloc[:, 1].to_numpy()
+        self.df["it_power_total"] = self.df_dc.iloc[:, 0].to_numpy()
+        self.df["dc_power_total"] = self.df_dc.iloc[:, 1].to_numpy()
 
         self.df.drop(self.df.tail(3).index, inplace=True) #Temporary fix for mistmatch in time index
 
@@ -334,6 +333,7 @@ class GridAnalysis:
             json.dump(res, fp)
 
         self.enhance_index()
+        
 
         return self.df
 

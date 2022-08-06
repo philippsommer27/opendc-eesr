@@ -6,8 +6,8 @@ import logging
 from util import inline
 from pandas import Timestamp
 import warnings
-import pdfkit
 import pandas as pd
+from weasyprint import HTML
 
 logger = logging.getLogger(__name__)
 
@@ -53,16 +53,18 @@ def generate_compact_profile(data_path, profile_name, generate_domain=False):
 
 
 def to_pdf(report, out):
-    pdfkit.from_file(report, out)
+    HTML(report).write_pdf(out)
 
+def to_image(report, out):
+    pass
 
 # Analysis Methods
 def opendc_grid_analysis(
-    dc_path, key_path, offset, start: Timestamp, end: Timestamp, country, out
+    dc_path, key_path, start: Timestamp, country, out, tz="Europe/Amsterdam"
 ):
-    df_dc = process(dc_path, offset)
+    df_dc = process(dc_path, start, tz)
 
-    analysis = GridAnalysis(df_dc, start, end, key_path, country)
+    analysis = GridAnalysis(df_dc, key_path, country)
     df = analysis.analyze(out, "OpenDC Simulator", "https://opendc.org/")
 
     return df
@@ -72,12 +74,10 @@ if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     # trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
     trace = "C:/Users/phili/Desktop/output/out.csv"
-    offset = "20181123"
     start = Timestamp("20181123", tz="Europe/Amsterdam")
-    end = Timestamp("20190212", tz="Europe/Amsterdam")
     key_path = "G:/My Drive/VU Amsterdam/Year 3/Bachelor Project/entsoe_token.txt"
     res = "result.json"
-    df = opendc_grid_analysis(trace, key_path, offset, start, end, "NL", res)
+    df = opendc_grid_analysis(trace, key_path, start, "NL", res)
 
     df2 = df["DC Consumption"].sum()
     df2 = df2.rename(lambda x: x.replace("dc_cons_", ""))
