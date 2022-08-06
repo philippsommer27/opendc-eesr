@@ -1,12 +1,1 @@
-{
-    "builtin_metrics": {
-        "CO2": 9671.213294422976,
-        "GEC": 0.08184239288193383,
-        "APCr": 0.5343182764215224,
-        "CUE": 99.48755067781893
-    },
-    "domain": [{
-        "name": "Total Energy Use (MWh)",
-        "value": 64.86001774183482
-    }]
-}
+{"builtin_metrics": {"CO2": 9671.213294422976, "GEC": 0.08187352519381481, "APCr": 0.5347166365170426, "CUE": 99.48755067781893}, "domain": [{"name": "Total Energy Use (MWh)", "value": 64.83535479619806}], "metadata": {"start_date": "2018-11-23", "end_date": "2019-02-12", "environment": "OpenDC Simulator", "environment_link": "https://opendc.org/"}}

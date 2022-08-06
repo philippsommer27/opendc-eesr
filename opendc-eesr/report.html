@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
+		<style>
+        p {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        .main-border {
+            border-radius: 15px;
+            border: 2px solid black;
+            width: 475px;
+            margin: auto;
+        }
+
+        .divider {
+            border-bottom: 3px solid #333;
+            width: 465px;
+            margin: 0 auto;
+        }
+
+        .h-organizer {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .bottom-organizer {
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .item-left {
+            display: inline-block;
+        }
+
+        .item-right {
+            float: right;
+            text-align: right;
+        }
+
+        .item-right-info{
+            margin-right: 5px;
+        }
+
+        .metric-text {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .material-symbols-outlined.green {
+            color: green;
+            font-size: 30px;
+        }
+
+        .material-symbols-outlined.yellow {
+            color: #fce303;
+            font-size: 30px;
+        }
+
+        .v-line {
+            border-left: 2px solid;
+            height: 90px;
+            float: right;
+        }
+
+        .logo {
+            float: right;
+            height: 80px;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+
+        .figure {
+            margin: 0 auto;
+            width: 475px;
+        }
+
+        .doclink {
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .comment{
+            font-size: 16px;
+            text-align: center ;
+        }
+
+        .energy-icon {
+            width: 32px;
+        }
+
+        .a-remover {
+            color: inherit;
+            text-decoration: inherit; 
+        }
+    
+		</style>
+	</head>
+	<body style="font-family: Arial, Helvetica, sans-serif;">
+		<div class="main-border">
+			<h1 style="text-align: center; margin: 10px;">EES Report</h1>
+			<div class="divider">
+			</div>
+			<div id="metricAppend">
+				<div class="h-organizer">
+					<div class="item-left">
+						<h1 class="metric-text">
+							<a href="https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/gec" target="_blank" class="a-remover">GEC</a>
+						</h1>
+					</div>
+					<div class="item-left">
+						<span class="material-symbols-outlined green">eco</span>
+					</div>
+					<div class="item-right">
+						<h1 class="metric-text">0.08</h1>
+					</div>
+				</div>
+				<div class="h-organizer">
+					<div class="item-left">
+						<h1 class="metric-text">
+							<a href="https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/apcr" target="_blank" class="a-remover">APCr</a>
+						</h1>
+					</div>
+					<div class="item-left">
+						<span class="material-symbols-outlined green">eco</span>
+					</div>
+					<div class="item-right">
+						<h1 class="metric-text">0.53</h1>
+					</div>
+				</div>
+				<div class="h-organizer">
+					<div class="item-left">
+						<h1 class="metric-text">
+							<a href="" target="_blank" class="a-remover">CO2</a>
+						</h1>
+					</div>
+					<div class="item-left">
+						<span class="material-symbols-outlined green">eco</span>
+					</div>
+					<div class="item-right">
+						<h1 class="metric-text">9671.21</h1>
+					</div>
+				</div>
+				<div class="h-organizer">
+					<div class="item-left">
+						<h1 class="metric-text">
+							<a href="https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/cue" target="_blank" class="a-remover">CUE</a>
+						</h1>
+					</div>
+					<div class="item-left">
+						<span class="material-symbols-outlined green">eco</span>
+					</div>
+					<div class="item-right">
+						<h1 class="metric-text">99.49</h1>
+					</div>
+				</div>
+			</div>
+			<div class="divider">
+			</div>
+			<div id="businessAppend">
+				<div class="h-organizer">
+					<div class="item-left">
+						<h2 class="metric-text">Total Energy Use (MWh)</h2>
+					</div>
+					<div class="item-right">
+						<h2 class="metric-text">64.84</h2>
+					</div>
+				</div>
+			</div>
+			<div class="divider">
+			</div>
+			<div id="graphAppend">
+				<img class="figure" src="reporting/library/templates/content/energy_sources.svg" />
+			</div>
+			<div class="divider">
+			</div>
+			<div class="bottom-organizer">
+				<div class="item-left" id="bottomNameAppend">
+					<p>Timeframe</p>
+					<p>Environment</p>
+					<p>Report ID</p>
+				</div>
+				<img src="reporting/library/templates/content/opendc_logo.svg" class="logo" />
+				<div class="v-line">
+				</div>
+				<div class="item-right item-right-info" id="bottomValueAppend">
+					<p>2018-11-23 to 2019-02-12</p>
+					<p>
+						<a href="https://opendc.org/" target="_blank">OpenDC Simulator</a>
+					</p>
+					<p>5c834e66-c806-59b2-9b44-ff7788cb013b</p>
+				</div>
+			</div>
+			<div class="doclink">
+				<a href="http://opendc-eesr.readthedocs.io/" target="_blank">Methodology and Documentation</a>
+			</div>
+		</div>
+	</body>
+</html>

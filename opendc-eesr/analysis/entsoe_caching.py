@@ -92,7 +92,6 @@ def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, e
             
             cache_entry(query, res, do_caching)
         except:
-            print("Error: crossborder flow is most likely empty")
             return None
 
     return res

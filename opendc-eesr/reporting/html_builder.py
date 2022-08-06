@@ -9,7 +9,6 @@ class HTMLBuilder:
     __templates = {
         "std": "reporting/library/templates/std_template.html",
         "compact": "reporting/library/templates/compact_template.html",
-        "dashboard": ""
     }
 
     __profiles = {
@@ -56,8 +55,8 @@ class HTMLBuilder:
             )
         )
 
-    def __build_energy_graph(self, y1, y2, x):
-        img_path = grapher.rn_energy_adapt(y1, y2, x)
+    def __build_graph(self, graph_data):
+        img_path = grapher.selector(self.profile['graph'], graph_data)
         return img(src=img_path, _class='figure')
 
     def generate_domain(self):
@@ -68,13 +67,15 @@ class HTMLBuilder:
             value = metric['value']
             business_append.append(self.__build_business_div(name, value))       
 
-    def generates_graphs(self):
+    def generates_graph(self, graph_data):
         graph_append = self.page.getElementById("graphAppend")
-
         
+        graph_append.append(self.__build_graph(graph_data))
+
         if "graph_comment" in self.data:
             comment = p(_class="comment").html(self.data['graph_comment'])        
             graph_append.append(comment)
+        
 
     def generate_metrics(self):
         metrics_append = self.page.getElementById("metricAppend")

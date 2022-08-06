@@ -1,3 +1,4 @@
+from matplotlib.pyplot import grid
 import pandas as pd
 import json
 from entsoe import mappings
@@ -57,7 +58,6 @@ class GridAnalysis:
                 self.caching,
             )
             if neighbour_flow is None or neighbour_flow.sum() == 0:
-                print("Skipping neighbour...")
                 continue
             neighbour_flow = ensure_freq(neighbour_flow, self.freq)
 
@@ -112,8 +112,6 @@ class GridAnalysis:
         return df
 
     def merge_dc_grid(self, true_time: bool):
-        # print(f"GRID {self.df.index[0]} - {self.df.index[-1]}")
-        # print(f"DC {self.df_dc.index[0]} - {self.df_dc.index[-1]}")
 
         assert (
             abs(len(self.df) - len(self.df_dc)) < 100
@@ -141,6 +139,8 @@ class GridAnalysis:
 
         self.df["dc_power_total"] = self.df_dc.iloc[:, 0].to_numpy()
         self.df["it_power_total"] = self.df_dc.iloc[:, 1].to_numpy()
+
+        self.df.drop(self.df.tail(3).index, inplace=True) #Temporary fix for mistmatch in time index
 
     def compute_energy_prod_ratios(self):
         columns = self.df.columns
@@ -203,20 +203,6 @@ class GridAnalysis:
 
         # Calc based on specified 'greeness'
         if self.green_ratio is not None:
-            # difference_ren = self.green_ratio - self.df['renewable_perc']
-            # difference_non_ren = self.green_ratio - self.df['non_renewable_perc']
-            # assert not any(difference_ren<0), "Not all time entries had less than green_ratio"
-            # assert not any(difference_non_ren<0), "Not all time entries had less than green_ratio"
-
-            # for column in self.df.columns:
-            #     if column in PROD_CAT.keys():
-            #         ratio = self.df[column] / self.df['total_prod']
-            #         if PROD_CAT[column]['renewable']:
-            #             new_ratio = (((ratio / self.df['renewable_perc'])  * difference_ren) + ratio)
-            #             self.df['dc_cons_' + column] = new_ratio * self.df['dc_power_total']
-            #         else:
-            #             new_ratio = (ratio - ((ratio / self.df['non_renewable_perc'] ) * difference_non_ren))
-            #             self.df['dc_cons_' + column] =  new_ratio * self.df['dc_power_total']
             for i in self.df.index:
                 ren_perc = self.df.at[i, "renewable_perc"]
                 non_ren_perc = self.df.at[i, "non_renewable_perc"]
@@ -300,7 +286,28 @@ class GridAnalysis:
     def compute_total_power(self):
         return self.df["dc_power_total"].sum() / 1000
 
-    def analyze(self, out, assume="best"):
+    def enhance_index(self):
+        grid_prod = []
+        dc_cons= []
+        misc = []
+        for column in self.df.columns:
+            if column in PROD_CAT.keys():
+                grid_prod.append(column)
+            elif "dc_cons_" in column:
+                dc_cons.append(column)
+            else:
+                misc.append(column)
+        
+        zipped = dict(zip(grid_prod, ['Grid Production' for _ in range(len(grid_prod))]))
+        zipped.update(dict(zip(dc_cons, ['DC Consumption' for _ in range(len(dc_cons))])))
+        zipped.update(dict(zip(misc, ['Other' for _ in range(len(misc))])))
+
+        new_index = pd.MultiIndex.from_arrays([self.df.columns.map(zipped.get), self.df.columns])
+
+        self.df.set_axis(new_index, axis=1, inplace=True)
+             
+
+    def analyze(self, out, env, env_link=None, assume="best"):
         self.compute_energy_prod_ratios()
         self.compute_dc_cons_by_type()
         self.compute_dc_energy_prod_ratios()
@@ -313,10 +320,20 @@ class GridAnalysis:
         res = {
             "builtin_metrics": {"CO2": CO2, "GEC": GEC, "APCr": APCren, "CUE": CUE},
             "domain": [{"name": "Total Energy Use (MWh)", "value": power}],
+            "metadata" : { 
+                "start_date" : str(self.start.date()),
+                "end_date" : str(self.end.date()),
+                "environment" : env
+                }
         }
+
+        if env_link is not None:
+            res['metadata']['environment_link'] = env_link
 
         with open(out, "w") as fp:
             json.dump(res, fp)
+
+        self.enhance_index()
 
         return self.df
 

@@ -37,14 +37,10 @@
                 "type" : "string"
             }
         },
-        "graphs" : {
+        "graph" : {
             "description" : "List of graph IDs to generate and display in the report",
-            "type" : "array",
-            "uniqueItems" : true,
-            "items" : {
-                "type" : "string"
-            }
+            "type" : "string"
         }
     },
-    "required": ["name", "builtin_metrics", "graphs"]
+    "required": ["name", "builtin_metrics", "graph"]
 }

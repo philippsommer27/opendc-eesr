@@ -10,7 +10,7 @@ def ensure_freq(df: DataFrame, wanted_freq):
 def resample(df: DataFrame, wanted_freq):
     freq = infer_freq(df.index)
     if wanted_freq > freq:
-        df.resample('15Min', label='right', closed='right').sum()
+        df = df.resample('15Min', label='right', closed='right').sum()
         return df
     else:
         if wanted_freq != '15T': raise Exception("Currently only supports 15 minute timeframe for upsampling")
