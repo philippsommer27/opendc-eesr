@@ -1,13 +1,12 @@
-from operator import index
-from reporting import run_basic_validation, html_builder, grapher
+from reporting import run_basic_validation, html_builder
 from analysis import GridAnalysis, process
 import json
 import logging
 from util import inline
 from pandas import Timestamp
 import warnings
-import pandas as pd
 from weasyprint import HTML
+import fitz
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +54,12 @@ def generate_compact_profile(data_path, profile_name, generate_domain=False):
 def to_pdf(report, out):
     HTML(report).write_pdf(out)
 
+#Based on solution: https://stackoverflow.com/a/55480474
 def to_image(report, out):
-    pass
+    doc = fitz.open(report)
+    page = doc.load_page(0)
+    pix = page.get_pixmap(dpi=300)
+    pix.save(out)
 
 # Analysis Methods
 def opendc_grid_analysis(
@@ -85,3 +88,4 @@ if __name__ == "__main__":
 
     generate_standard_profile(res, "sus_prof", [df2], True)
     to_pdf("report.html", "report.pdf")
+    to_image("report.pdf", "report.png")
