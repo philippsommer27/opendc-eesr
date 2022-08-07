@@ -2,9 +2,10 @@ import argparse
 import os
 import sys
 import interface
+import logging
 
-def dispatch(data, args=None):
-    interface.generate_standard_profile(data)
+def dispatch(args):
+    interface.generate_standard_profile(args.data)
 
 def main():
     parser = argparse.ArgumentParser(prog="OpenDC EESR", description="OpenDC energy and sustainability report builder")
@@ -20,7 +21,7 @@ def main():
 
     args = parser.parse_args()
 
-    dispatch(args.data)
+    dispatch(args)
 
 if __name__ == "__main__":
     # sys.exit(main())
