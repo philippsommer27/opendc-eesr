@@ -4,7 +4,6 @@ import json
 import logging
 from util import inline
 from pandas import Timestamp
-import warnings
 from weasyprint import HTML
 import fitz
 
@@ -74,18 +73,4 @@ def opendc_grid_analysis(
 
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore")
-    # trace = "C:/Users/phili/Documents/University/opendc/output/out.csv"
-    trace = "C:/Users/phili/Desktop/output/out.csv"
-    start = Timestamp("20181123", tz="Europe/Amsterdam")
-    key_path = "G:/My Drive/VU Amsterdam/Year 3/Bachelor Project/entsoe_token.txt"
-    res = "result.json"
-    df = opendc_grid_analysis(trace, key_path, start, "NL", res)
-
-    df2 = df["DC Consumption"].sum()
-    df2 = df2.rename(lambda x: x.replace("dc_cons_", ""))
-    df2 = df2 / 1000
-
-    generate_standard_profile(res, "sus_prof", [df2], True)
-    to_pdf("report.html", "report.pdf")
-    to_image("report.pdf", "report.png")
+    pass
