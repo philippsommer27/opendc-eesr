@@ -2,6 +2,8 @@ from pandas import DataFrame, Series, infer_freq, Timedelta
 
 def ensure_freq(df: DataFrame, wanted_freq):
     freq = infer_freq(df.index)
+    if freq is None:
+        freq = infer_freq(df.index[0:3])
     if freq != wanted_freq:
         return resample(df, wanted_freq)
     else:
@@ -9,6 +11,9 @@ def ensure_freq(df: DataFrame, wanted_freq):
 
 def resample(df: DataFrame, wanted_freq):
     freq = infer_freq(df.index)
+    if freq is None:
+        freq = infer_freq(df.index[0:3])
+
     if wanted_freq > freq:
         df = df.resample('15Min', label='right', closed='right').sum()
         return df

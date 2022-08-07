@@ -26,9 +26,9 @@ class HTMLBuilder:
         self.metrics_library = load_json(HLIBRARY_PATH + '/metrics_library.json')
         self.data = data
 
-    def __build_metric_div(self, name, value, icon, link, rating=None):
+    def __build_metric_div(self, name, value, icon, link, fullname, rating=None):
         return div(_class="h-organizer").html(
-            div(_class="item-left").html(
+            div(_class="item-left", title=fullname).html(
                 h1(_class="metric-text").html(
                     a(name,
                     _href=link,
@@ -87,8 +87,9 @@ class HTMLBuilder:
             value = self.data['builtin_metrics'][metric]
             icon = self.metrics_library[metric]['icon']
             link = self.metrics_library[metric]['documentation']
+            fullname = self.metrics_library[metric]['fullname']
 
-            metrics_append.append(self.__build_metric_div(metric, value, icon, link))
+            metrics_append.append(self.__build_metric_div(metric, value, icon, link, fullname))
 
     def generate_meta(self):
         bottom_name_append = self.page.getElementById("bottomNameAppend")
@@ -120,7 +121,9 @@ class HTMLBuilder:
         parser = html5lib.HTMLParser(tree=getTreeBuilder())
         return parser.parse(file)
 
-    def write_html(self, path="report.html"):
+    def write_html(self, path):
         f = open(path, "w")
         f.write(f"{self.page}")
         f.close()
+
+        return path

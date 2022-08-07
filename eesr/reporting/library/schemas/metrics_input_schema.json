@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id" : "",
+    "$id" : "https://github.com/philippsommer27/opendc-eesr/blob/main/eesr/reporting/library/schemas/metrics_input_schema.json",
     "title": "OpenDC EESR Data Schema",
     "description": "JSON schema definition for expected data for opendc-eesr report builder",
     "type" : "object",
@@ -18,10 +18,13 @@
                     "APCr" : {
                         "type" : "number"
                     },
-                    "CO2 (g)" : {
+                    "CO2 (kg)" : {
                         "type" : "number"
                     },
-                    "GEC" : {
+                    "GEC (green)" : {
+                        "type" : "number"
+                    },
+                    "GEC (ren)" : {
                         "type" : "number"
                     },
                     "TUE" : {

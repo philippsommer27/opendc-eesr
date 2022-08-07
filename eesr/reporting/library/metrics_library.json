@@ -14,13 +14,18 @@
         "icon" : "eco",
         "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/apcr"        
     },
-    "CO2 (g)" : {
-        "fullname" : "Total carbon dioxide emissions",
+    "CO2 (kg)" : {
+        "fullname" : "Total Carbon Dioxide Equivalent Emissions",
         "icon" : "eco",
-        "documentation" : ""        
+        "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/total-co2"        
     },
-    "GEC" : {
-        "fullname" : "Green Energy Coefficient",
+    "GEC (ren)" : {
+        "fullname" : "Green Energy Coefficient (renewable definition)",
+        "icon" : "eco",
+        "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/gec"        
+    },
+    "GEC (green)" : {
+        "fullname" : "Green Energy Coefficient (green definition)",
         "icon" : "eco",
         "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/gec"        
     },
@@ -43,7 +48,15 @@
         "fullname" : "Data Center Performance Per Energy",
         "icon" : "none",
         "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/dppe"        
+    },
+    "WUE" : {
+        "fullname" : "Water Usage Effectivenesss",
+        "icon" : "none",
+        "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/wue"        
+    },
+    "ERE" : {
+        "fullname" : "Energy Reuse Effectiveness",
+        "icon" : "eco",
+        "documentation" : "https://philipp-sommerhalter.gitbook.io/eesr/library/metrics/ere"        
     }
-
-    
 }

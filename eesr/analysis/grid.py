@@ -65,9 +65,24 @@ class GridAnalysis:
 
             neighbour_prod = self.fetch_energy_prod(neighbour_code, False)
 
-            assert (
-                neighbour_flow.shape[0] == neighbour_prod.shape[0]
-            ), f"Fetch Border Error: {neighbour_flow.shape[0]} and {neighbour_prod.shape[0]} do not match"
+            if neighbour_flow is None:
+                continue
+
+            difference_1 = neighbour_flow.shape[0] - neighbour_prod.shape[0]
+            if difference_1 > 0 and difference_1 < 500: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
+                neighbour_prod = pd.concat([neighbour_prod, neighbour_prod.iloc[-difference_1:]], ignore_index=True)
+
+            difference_2 = neighbour_prod.shape[0] - neighbour_flow.shape[0] 
+            if difference_2 > 0 and difference_2 < 500: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
+                neighbour_flow = pd.concat([neighbour_flow, neighbour_flow.iloc[-difference_2:]], ignore_index=True)
+            
+            if neighbour_flow.shape[0] != neighbour_prod.shape[0]:
+                continue
+
+            #TODO Fix 
+            # assert (
+            #     neighbour_flow.shape[0] == neighbour_prod.shape[0]
+            # ), f"Fetch Border Error: {neighbour_flow.shape[0]} and {neighbour_prod.shape[0]} do not match. Should be {df.shape[0]}"
 
             columns = neighbour_prod.columns
             neighbour_prod["total_prod"] = neighbour_prod.sum(axis=1)
@@ -93,6 +108,9 @@ class GridAnalysis:
         df = cached_query_generation(
             country, self.start, self.end, self.key_path, self.caching
         )
+
+        if df is None:
+            return None
 
         # Cleanup
 
@@ -122,7 +140,7 @@ class GridAnalysis:
         # Truncate to match timeframe
         diff = abs(len(self.df) - len(self.df_dc))
         if len(self.df) > len(self.df_dc):
-            self.df.drop(self.df.tail(len(diff).index, inplace=True))
+            self.df.drop(self.df.tail(diff).index, inplace=True)
         elif len(self.df) < len(self.df_dc):
             self.df_dc.drop(self.df_dc.tail(diff).index, inplace=True)
 
@@ -257,22 +275,26 @@ class GridAnalysis:
 
         return APCren
 
-    def compute_total_co2(self, assume="best"):
-        if assume == "best":
-            co2_df = pd.read_csv(DATA_PATH + "/LCA_CO2_BEST.csv")
-        elif assume == "worst":
-            co2_df = pd.read_csv(DATA_PATH + "/LCA_CO2_Worst.csv")
+    def compute_total_co2(self):
+        co2_best_df = pd.read_csv(DATA_PATH + "/LCA_CO2_BEST.csv")
+        co2_worst_df = pd.read_csv(DATA_PATH + "/LCA_CO2_Worst.csv")
 
-        self.df["total_co2"] = 0
+        self.df["total_co2_best"] = 0
+        self.df["total_co2_worst"] = 0
 
         for column in self.df.columns:
             if "dc_cons_" in column:
-                self.df["total_co2"] = self.df["total_co2"] + (
-                    co2_df.loc[co2_df["TYPE"] == column[8:], "CO2 [gCO2/kWh]"].values[0]
+                self.df["total_co2_best"] = self.df["total_co2_best"] + (
+                    co2_best_df.loc[co2_best_df["TYPE"] == column[8:], "CO2 [gCO2/kWh]"].values[0]
                     * self.df[column]
                 )
 
-        return self.df["total_co2"].sum() / 1000
+                self.df["total_co2_worst"] = self.df["total_co2_worst"] + (
+                    co2_worst_df.loc[co2_worst_df["TYPE"] == column[8:], "CO2 [gCO2/kWh]"].values[0]
+                    * self.df[column]
+                )
+
+        return ((self.df["total_co2_best"].sum() / 1000), (self.df["total_co2_worst"].sum() / 1000))
 
     def compute_gec_green(self):
         return self.df["dc_green_total"].sum() / self.df["dc_power_total"].sum()
@@ -281,7 +303,7 @@ class GridAnalysis:
         return self.df["dc_renewable_total"].sum() / self.df["dc_power_total"].sum()
 
     def compute_cue(self):
-        self.df["cue"] = self.df["total_co2"] / self.df["it_power_total"]
+        self.df["cue"] = self.df["total_co2_worst"] / self.df["it_power_total"]
 
         return self.df["cue"].mean()
 
@@ -314,13 +336,14 @@ class GridAnalysis:
         self.compute_dc_cons_by_type()
         self.compute_dc_energy_prod_ratios()
         APCren = self.compute_apcren()
-        CO2 = self.compute_total_co2(assume)
-        GEC = self.compute_gec_renewable()
+        CO2_best, CO2_worst = self.compute_total_co2()
+        GEC_ren = self.compute_gec_renewable()
+        GEC_green = self.compute_gec_green()
         CUE = self.compute_cue()
         power = self.compute_total_power()
 
         res = {
-            "builtin_metrics": {"CO2 (g)": CO2, "GEC": GEC, "APCr": APCren, "CUE": CUE},
+            "builtin_metrics": {"CO2 (kg)": CO2_worst, "GEC (ren)": GEC_ren, "GEC (green)": GEC_green, "APCr": APCren, "CUE": CUE},
             "domain": [{"name": "Total Energy Use (MWh)", "value": power}],
             "metadata" : { 
                 "start_date" : str(self.start.date()),

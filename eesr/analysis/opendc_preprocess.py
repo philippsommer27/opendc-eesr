@@ -25,7 +25,7 @@ def process(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=
     df['dc_power_total'] = df['it_power_total'] * PUE
     
     df.set_index('timestamp', inplace=True)
-    df = df.tz_localize(tz)
+    df = df.tz_localize(tz, ambiguous=True)
 
     if (offset_time - df.index[0]) > pd.Timedelta(0):
         df.index = df.index + pd.Timedelta(offset_time - df.index[0])

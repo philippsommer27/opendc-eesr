@@ -47,10 +47,10 @@ def cache_lookup(query: CacheEntry, do_caching=True) -> DataFrame:
     res = cache_map.get(query)
 
     if res is not None:
-        print("Cache Hit!")
+        # print("Cache Hit!")
         return read_pickle(res)
 
-    print("Cache Miss!")
+    # print("Cache Miss!")
     return res
 
 def cache_entry(query: CacheEntry, res: DataFrame, do_caching=True):
@@ -76,10 +76,14 @@ def cached_query_generation(country, start: Timestamp, end: Timestamp, key_path,
 
     if res is None:
         client = EntsoePandasClient(api_key=get_key(key_path))
-
-        res = client.query_generation(country, start=start, end=end)
-        cache_entry(query, res, do_caching)
-
+        
+        try:
+            res = client.query_generation(country, start=start, end=end)
+            cache_entry(query, res, do_caching)
+        except:
+            print("Error with query, probably no matching data")
+            return None
+            
     return res
 
 def cached_query_crossborder_flows(country_from, country_to, start: Timestamp, end: Timestamp, key_path, do_caching=True):
