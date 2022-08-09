@@ -39,7 +39,7 @@
             }
         },
         "graph" : {
-            "description" : "List of graph IDs to generate and display in the report",
+            "description" : "Graph to generate and display in the report (unless custom graph)",
             "type" : "string"
         }
     },

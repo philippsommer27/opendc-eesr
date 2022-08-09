@@ -331,7 +331,7 @@ class GridAnalysis:
         self.df.set_axis(new_index, axis=1, inplace=True)
              
 
-    def analyze(self, out, env, env_link=None, assume="best"):
+    def analyze(self, out, env, env_link=None):
         self.compute_energy_prod_ratios()
         self.compute_dc_cons_by_type()
         self.compute_dc_energy_prod_ratios()
