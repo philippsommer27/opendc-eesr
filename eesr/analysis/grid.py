@@ -40,10 +40,10 @@ class GridAnalysis:
         self.merge_dc_grid(true_time=true_time)
 
     def calc_total_prod(self):
-        if "total_prod" in self.df:
-            self.df.drop("total_prod", axis=1, inplace=True)
+        if "grid_total_prod" in self.df:
+            self.df.drop("grid_total_prod", axis=1, inplace=True)
 
-        self.df["total_prod"] = self.df.loc[
+        self.df["grid_total_prod"] = self.df.loc[
             :, self.df.columns.isin(list(PROD_CAT))
         ].sum(axis=1)
 
@@ -67,13 +67,14 @@ class GridAnalysis:
 
             if neighbour_flow is None:
                 continue
-
+                
+            cutoff_point = df.shape[0] * .1
             difference_1 = neighbour_flow.shape[0] - neighbour_prod.shape[0]
-            if difference_1 > 0 and difference_1 < 500: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
+            if difference_1 > 0 and difference_1 < cutoff_point: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
                 neighbour_prod = pd.concat([neighbour_prod, neighbour_prod.iloc[-difference_1:]], ignore_index=True)
 
             difference_2 = neighbour_prod.shape[0] - neighbour_flow.shape[0] 
-            if difference_2 > 0 and difference_2 < 500: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
+            if difference_2 > 0 and difference_2 < cutoff_point: #Enstoe gaps causing mismatch in length, fixed by duplicating rows
                 neighbour_flow = pd.concat([neighbour_flow, neighbour_flow.iloc[-difference_2:]], ignore_index=True)
             
             if neighbour_flow.shape[0] != neighbour_prod.shape[0]:
@@ -85,11 +86,11 @@ class GridAnalysis:
             # ), f"Fetch Border Error: {neighbour_flow.shape[0]} and {neighbour_prod.shape[0]} do not match. Should be {df.shape[0]}"
 
             columns = neighbour_prod.columns
-            neighbour_prod["total_prod"] = neighbour_prod.sum(axis=1)
+            neighbour_prod["grid_total_prod"] = neighbour_prod.sum(axis=1)
 
             for column in columns:
                 neighbour_prod[column + "_perc"] = (
-                    neighbour_prod[column] / neighbour_prod["total_prod"]
+                    neighbour_prod[column] / neighbour_prod["grid_total_prod"]
                 )
                 neighbour_prod[column + "_flow"] = (
                     neighbour_prod[column + "_perc"] * neighbour_flow
@@ -157,8 +158,8 @@ class GridAnalysis:
             ), "DC end time does not match grid end time"
             self.df = pd.concat([self.df, self.df_dc], axis=1)
 
-        self.df["it_power_total"] = self.df_dc.iloc[:, 0].to_numpy()
-        self.df["dc_power_total"] = self.df_dc.iloc[:, 1].to_numpy()
+        self.df["it_energy_total"] = self.df_dc.iloc[:, 0].to_numpy()
+        self.df["dc_energy_total"] = self.df_dc.iloc[:, 1].to_numpy()
 
         self.df.drop(self.df.tail(3).index, inplace=True) #Temporary fix for mistmatch in time index
 
@@ -184,12 +185,12 @@ class GridAnalysis:
                 else:
                     self.df["non_green_total"] += self.df[column]
 
-        self.df["renewable_perc"] = self.df["renewable_total"] / self.df["total_prod"]
+        self.df["renewable_perc"] = self.df["renewable_total"] / self.df["grid_total_prod"]
         self.df["non_renewable_perc"] = (
-            self.df["non_renewable_total"] / self.df["total_prod"]
+            self.df["non_renewable_total"] / self.df["grid_total_prod"]
         )
-        self.df["green_perc"] = self.df["green_total"] / self.df["total_prod"]
-        self.df["non_green_perc"] = self.df["non_green_total"] / self.df["total_prod"]
+        self.df["green_perc"] = self.df["green_total"] / self.df["grid_total_prod"]
+        self.df["non_green_perc"] = self.df["non_green_total"] / self.df["grid_total_prod"]
 
     def compute_dc_energy_prod_ratios(self):
         columns = self.df.columns
@@ -216,7 +217,7 @@ class GridAnalysis:
 
     def compute_dc_cons_by_type(self):
         assert (
-            "dc_power_total" in self.df
+            "dc_energy_total" in self.df
         ), "Dataframe does not contain data center power consumption, consider calling merge_dc_grid()"
 
         self.calc_total_prod()
@@ -234,7 +235,7 @@ class GridAnalysis:
                             self.df["dc_cons_" + column] = 0
 
                         column_ratio = (
-                            self.df.at[i, column] / self.df.at[i, "total_prod"]
+                            self.df.at[i, column] / self.df.at[i, "grid_total_prod"]
                         )
 
                         if (
@@ -249,24 +250,24 @@ class GridAnalysis:
                                 column_ratio_non_ren_ratio = column_ratio / non_ren_perc
                                 ratio = column_ratio - (column_ratio_non_ren_ratio * non_ren_difference)
                         else:
-                            ratio = column_ratio * self.df.at[i, "dc_power_total"]
+                            ratio = column_ratio * self.df.at[i, "dc_energy_total"]
 
-                        self.df.at[i, "dc_cons_" + column] = ratio * self.df.at[i, 'dc_power_total']
+                        self.df.at[i, "dc_cons_" + column] = ratio * self.df.at[i, 'dc_energy_total']
 
         # Naive
         else:
             for column in self.df.columns:
                 if column in PROD_CAT.keys():
-                    perc = self.df[column] / self.df["total_prod"]
-                    self.df["dc_cons_" + column] = perc * self.df["dc_power_total"]
+                    perc = self.df[column] / self.df["grid_total_prod"]
+                    self.df["dc_cons_" + column] = perc * self.df["dc_energy_total"]
         
     def compute_apcren(self):
-        assert "dc_power_total" in self.df, "Dataframe does not contain DC power usage"
+        assert "dc_energy_total" in self.df, "Dataframe does not contain DC power usage"
         assert (
             "renewable_total" in self.df
         ), "Dataframe does not contain grid renewable consumption"
 
-        dc_sum_consumption_mw = self.df["dc_power_total"] / 1000
+        dc_sum_consumption_mw = self.df["dc_energy_total"] / 1000
         grid_sum_renewable_production = self.df["renewable_total"]
         K = dc_sum_consumption_mw.sum() / grid_sum_renewable_production.sum()
 
@@ -297,18 +298,18 @@ class GridAnalysis:
         return ((self.df["total_co2_best"].sum() / 1000), (self.df["total_co2_worst"].sum() / 1000))
 
     def compute_gec_green(self):
-        return self.df["dc_green_total"].sum() / self.df["dc_power_total"].sum()
+        return self.df["dc_green_total"].sum() / self.df["dc_energy_total"].sum()
 
     def compute_gec_renewable(self):
-        return self.df["dc_renewable_total"].sum() / self.df["dc_power_total"].sum()
+        return self.df["dc_renewable_total"].sum() / self.df["dc_energy_total"].sum()
 
     def compute_cue(self):
-        self.df["cue"] = self.df["total_co2_worst"] / self.df["it_power_total"]
+        self.df["cue"] = self.df["total_co2_worst"] / self.df["it_energy_total"]
 
         return self.df["cue"].mean()
 
     def compute_total_power(self):
-        return self.df["dc_power_total"].sum() / 1000
+        return self.df["dc_energy_total"].sum() / 1000
 
     def enhance_index(self):
         grid_prod = []
@@ -348,8 +349,9 @@ class GridAnalysis:
             "metadata" : { 
                 "start_date" : str(self.start.date()),
                 "end_date" : str(self.end.date()),
-                "environment" : env
-                }
+                "environment" : env,
+                "country": self.country
+            }
         }
 
         if env_link is not None:

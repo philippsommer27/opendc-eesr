@@ -139,9 +139,12 @@
                     "description" : "Link",
                     "type" : "string",
                     "format" : "uri"
+                },
+                "coutnry" : {
+                    "type" : "string"
                 }
             },
-            "required" : ["start_date", "end_date", "environment"]
+            "required" : ["start_date", "end_date", "environment", "country"]
         }
     },
     "required": ["builtin_metrics", "metadata"]

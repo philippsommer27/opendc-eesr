@@ -20,7 +20,7 @@ class HTMLBuilder:
         "ee_prof": HLIBRARY_PATH + "/profiles/ee_prof.json"
     }
 
-    def __init__(self, data, profile="std_prof", custom_profile=None, template="std", custom_template=None):
+    def __init__(self, data, profile="std_prof", custom_profile=None, template="std", custom_template=None, graph=None):
         self.page = self.read_template(custom_template or self.__templates[template])
         self.profile = load_json(custom_profile or self.__profiles[profile])
         self.metrics_library = load_json(HLIBRARY_PATH + '/metrics_library.json')
@@ -94,10 +94,13 @@ class HTMLBuilder:
     def generate_meta(self):
         bottom_name_append = self.page.getElementById("bottomNameAppend")
         bottom_value_append = self.page.getElementById("bottomValueAppend")
-
+        
         duration = self.data['metadata']['start_date'] + " to " + self.data['metadata']['end_date']
         bottom_name_append.append(p("Timeframe"))
         bottom_value_append.append(p(duration))
+        
+        bottom_name_append.append(p("Country"))
+        bottom_value_append.append(p(self.data['metadata']['country']))
 
         bottom_name_append.append(p("Environment"))
         if "environment_link" in self.data['metadata']:

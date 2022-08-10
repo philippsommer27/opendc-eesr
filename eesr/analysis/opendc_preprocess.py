@@ -20,9 +20,9 @@ def process(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=
     
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-    df['it_power_total'] = joule_to_kWh(df['it_power_total'])
+    df['it_energy_total'] = joule_to_kWh(df['it_power_total'])
 
-    df['dc_power_total'] = df['it_power_total'] * PUE
+    df['dc_energy_total'] = df['it_energy_total'] * PUE
     
     df.set_index('timestamp', inplace=True)
     df = df.tz_localize(tz, ambiguous=True)
