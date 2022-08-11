@@ -1,5 +1,5 @@
 from eesr.reporting import run_basic_validation, html_builder
-from eesr.analysis import GridAnalysis, process
+from eesr.analysis import GridAnalysis, preprocess
 import json
 import logging
 from pandas import Timestamp
@@ -76,7 +76,7 @@ def to_image(report, out=None):
 def opendc_grid_analysis(
     dc_path, key_path, start: Timestamp, country, out, tz="Europe/Amsterdam", caching=True, green_ratio=None, PUE=1.5
 ):
-    df_dc = process(dc_path, start, tz, PUE=PUE)
+    df_dc = preprocess(dc_path, start, tz, PUE=PUE)
 
     analysis = GridAnalysis(df_dc, key_path, country, caching=caching, green_ratio=green_ratio)
     df = analysis.analyze(out, "OpenDC Simulator (Solvinity)", "https://opendc.org/")

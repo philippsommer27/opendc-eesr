@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def process(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=1.5):
+def preprocess(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=1.5):
 
     joule_to_kWh = lambda x: np.longdouble(x / (3.6e6))
 

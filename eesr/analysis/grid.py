@@ -14,6 +14,7 @@ this_dir, this_filename = os.path.split(__file__)
 DATA_PATH = os.path.join(this_dir, "data")
 
 class GridAnalysis:
+
     def __init__(
         self,
         df_dc: pd.DataFrame,
@@ -331,7 +332,6 @@ class GridAnalysis:
 
         self.df.set_axis(new_index, axis=1, inplace=True)
              
-
     def analyze(self, out, env, env_link=None):
         self.compute_energy_prod_ratios()
         self.compute_dc_cons_by_type()
