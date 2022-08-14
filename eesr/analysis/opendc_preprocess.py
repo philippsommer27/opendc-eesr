@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def preprocess(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=1.5):
+def preprocess(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", PUE=1.59):
 
     joule_to_kWh = lambda x: np.longdouble(x / (3.6e6))
 
@@ -24,10 +24,13 @@ def preprocess(path, offset_time : pd.Timestamp = None, tz="Europe/Amsterdam", P
 
     df['dc_energy_total'] = df['it_energy_total'] * PUE
     
+    df.rename(columns={'it_power_total':'it_energy_total'})
+    df.drop(columns=['it_power_total'])
+
     df.set_index('timestamp', inplace=True)
     df = df.tz_localize(tz, ambiguous=True)
 
     if (offset_time - df.index[0]) > pd.Timedelta(0):
         df.index = df.index + pd.Timedelta(offset_time - df.index[0])
-
+    
     return df

@@ -159,8 +159,8 @@ class GridAnalysis:
             ), "DC end time does not match grid end time"
             self.df = pd.concat([self.df, self.df_dc], axis=1)
 
-        self.df["it_energy_total"] = self.df_dc.iloc[:, 0].to_numpy()
-        self.df["dc_energy_total"] = self.df_dc.iloc[:, 1].to_numpy()
+        self.df["it_energy_total"] = self.df_dc['it_energy_total'].to_numpy()
+        self.df["dc_energy_total"] = self.df_dc['dc_energy_total'].to_numpy()
 
         self.df.drop(self.df.tail(3).index, inplace=True) #Temporary fix for mistmatch in time index
 
@@ -345,7 +345,7 @@ class GridAnalysis:
 
         res = {
             "builtin_metrics": {"CO2 (kg)": CO2_worst, "GEC (ren)": GEC_ren, "GEC (green)": GEC_green, "APCr": APCren, "CUE": CUE},
-            "domain": [{"name": "Total Energy Use (MWh)", "value": power}],
+            "domain": [{"name": "Total Energy (MWh)", "value": power}],
             "metadata" : { 
                 "start_date" : str(self.start.date()),
                 "end_date" : str(self.end.date()),

@@ -74,7 +74,7 @@ def to_image(report, out=None):
     
 # Analysis Methods
 def opendc_grid_analysis(
-    dc_path, key_path, start: Timestamp, country, out, tz="Europe/Amsterdam", caching=True, green_ratio=None, PUE=1.5
+    dc_path, key_path, start: Timestamp, country, out, tz="Europe/Amsterdam", caching=True, green_ratio=None, PUE=1.59
 ):
     df_dc = preprocess(dc_path, start, tz, PUE=PUE)
 
