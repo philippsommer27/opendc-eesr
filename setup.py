@@ -21,7 +21,7 @@ requirements = ['domonic',
 
 setup(
     name='opendc-eesr',
-    version='0.0.5',    
+    version='0.0.1',    
     description='An instrument for reporting data center energy efficiency and sustanability.',
     url='https://github.com/philippsommer27/opendc-eesr',
     author='Philipp Sommerhalter',
